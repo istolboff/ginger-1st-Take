@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gari.Tests", "Gari.Tests\Gari.Tests.csproj", "{C4472E84-BE8A-4C3E-A5D0-9FF93997E509}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseOzhegovWithSolarix", "Ozhegov\ParseOzhegovWithSolarix\ParseOzhegovWithSolarix.csproj", "{05339C5B-B730-4E7B-805F-E9DA82B91D63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C4472E84-BE8A-4C3E-A5D0-9FF93997E509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4472E84-BE8A-4C3E-A5D0-9FF93997E509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4472E84-BE8A-4C3E-A5D0-9FF93997E509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05339C5B-B730-4E7B-805F-E9DA82B91D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05339C5B-B730-4E7B-805F-E9DA82B91D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05339C5B-B730-4E7B-805F-E9DA82B91D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05339C5B-B730-4E7B-805F-E9DA82B91D63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
