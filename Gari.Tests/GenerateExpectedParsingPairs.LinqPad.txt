@@ -1,0 +1,29 @@
+﻿void Main()
+{
+	Console.WriteLine(
+		from row in ReadExcelSpreadSheet(@"C:\Users\IStolbov\Downloads\Gari.xlsx", "Sheet2$").Rows.Cast<DataRow>()
+		where !(string.IsNullOrWhiteSpace(row["F1"].ToString()) && string.IsNullOrWhiteSpace(row["F2"].ToString()) && string.IsNullOrWhiteSpace(row["F3"].ToString()))
+		select string.IsNullOrWhiteSpace(row["F1"].ToString()) ? $"\t\t{{ \"{row["F2"]}\", \"{row["F3"].ToString().Replace("\"", "\\\"")}\" }}," : $"\t// {row["F1"].ToString()}");
+}
+
+DataTable ReadExcelSpreadSheet(string spreadsheetFilePath, string spreadsheetName)
+{
+	var extendedProperties = "\"Excel 8.0;HDR=NO;\"";
+	using (var connection = new OleDbConnection($"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={spreadsheetFilePath};Extended Properties={extendedProperties}"))
+	{
+		connection.Open();
+		using (var cmd = new OleDbCommand { Connection = connection, CommandText = $"select * from [{spreadsheetName}]" })
+        {
+			var dt = new DataTable { TableName = spreadsheetName };
+
+            var da = new OleDbDataAdapter(cmd);
+            da.Fill(dt);
+
+			var ds = new DataSet();
+            ds.Tables.Add(dt);
+			
+			return ds.Tables[0];
+		}
+	}
+}
+

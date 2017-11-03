@@ -29,6 +29,7 @@ _UpgradeReport_Files/
 bin/
 obj/
 TestResults/
+.vs/ginger/v15/
 ###################
 # project.lock.json#
 ###################
