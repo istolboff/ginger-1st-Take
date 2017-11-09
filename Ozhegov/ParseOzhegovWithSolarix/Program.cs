@@ -1,4 +1,5 @@
 ﻿using ParseOzhegovWithSolarix.Miscellaneous;
+using ParseOzhegovWithSolarix.Solarix;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,12 +12,12 @@ namespace ParseOzhegovWithSolarix
     {
         public static void Main(string[] args)
         {
-            using (var grammarEngine = new SolarixGrammarEngine())
+            using (var grammarEngine = new SolarixRussianGrammarEngine())
             {
                 grammarEngine.Initialize();
 
                 var differentThings = 
-                    File.ReadLines(@"C:\devl\Samples\ginger\Ozhegov\Ozhegov.txt", Encoding.GetEncoding("windows-1251"))
+                    File.ReadLines(@"C:\devl\Samples\tmp\Ozhegov\Ozhegov.txt", Encoding.GetEncoding("windows-1251"))
                     .Where(line => !string.IsNullOrEmpty(line))
                     .Select(line =>
                     {
@@ -92,7 +93,7 @@ namespace ParseOzhegovWithSolarix
                         };
                     })
                     // .Skip(200)
-                    .Take(40)
+                    .Take(5)
                     .GroupBy(item => item.ParsingResult.Count == 1 
                                     ? item.ParsingResult.Single() 
                                     : new SentenceElement(string.Empty, 0, new LemmaVersion[0], new SentenceElement[0], null))

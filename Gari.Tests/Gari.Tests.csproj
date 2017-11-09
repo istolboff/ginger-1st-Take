@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccumulatingAssert.cs" />
     <Compile Include="BasicNaturalLanguageSentenceParsingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -57,6 +58,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="GenerateExpectedParsingPairs.LinqPad.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ozhegov\ParseOzhegovWithSolarix\ParseOzhegovWithSolarix.csproj">
+      <Project>{05339C5B-B730-4E7B-805F-E9DA82B91D63}</Project>
+      <Name>ParseOzhegovWithSolarix</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
