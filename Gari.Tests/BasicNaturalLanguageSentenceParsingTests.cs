@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System;
+using ParseOzhegovWithSolarix;
 
 namespace Gari.Tests
 {
@@ -13,7 +14,7 @@ namespace Gari.Tests
             VerifyCorrectParsing(new Dictionary<string, string>
             {
               // P(x) 
-                { "Сократ стар", "СТАР(сократ)" },
+                { "Сократ стар", "СТАРЫЙ(сократ)" },
                 { "Сократ [-] [это] человек", "сократ ∈ set<Человек>" },
                 { "Сократ является человеком", "сократ ∈ set<Человек>" },
                 { "Вода кипит", "КИПИТ(вода)" }, 
@@ -174,7 +175,14 @@ namespace Gari.Tests
 
         private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
         {
-            throw new NotImplementedException();
+            var gariParser = new RussianGariParser();
+            using (var accumulatingAssert = new AccumulatingAssert())
+            {
+                foreach (var singleSentenceExpectation in expectedParsingResults)
+                {
+                    accumulatingAssert.AssertEqual(singleSentenceExpectation.Value, gariParser.ParseSentence(singleSentenceExpectation.Key).ToString());
+                }
+            }
         }
     }
 }

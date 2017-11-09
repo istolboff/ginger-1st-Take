@@ -46,17 +46,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LemmaVersion.cs" />
+    <Compile Include="PredicateLogic\LogicPredicate.cs" />
+    <Compile Include="PredicateLogic\LogicTerm.cs" />
+    <Compile Include="PredicateLogic\LogicVariable.cs" />
+    <Compile Include="Solarix\AdjectiveForm.cs" />
+    <Compile Include="Solarix\AdverbCharacteristics.cs" />
+    <Compile Include="Solarix\Case.cs" />
+    <Compile Include="Solarix\ComparisonForm.cs" />
+    <Compile Include="Solarix\Form.cs" />
+    <Compile Include="GariParser.cs" />
+    <Compile Include="Solarix\Gender.cs" />
+    <Compile Include="Solarix\GerundCharacteristics.cs" />
+    <Compile Include="Solarix\GrammarCharacteristics.cs" />
     <Compile Include="LinkType.cs" />
     <Compile Include="Miscellaneous\CollectionExtensions.cs" />
+    <Compile Include="Solarix\LemmaVersion.cs" />
+    <Compile Include="Solarix\NounCharacteristics.cs" />
+    <Compile Include="Solarix\NullGrammarCharacteristics.cs" />
+    <Compile Include="Solarix\Number.cs" />
     <Compile Include="PartOfSpeech.cs" />
+    <Compile Include="Solarix\Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SentenceElement.cs" />
-    <Compile Include="SolarixGrammarEngine.cs" />
+    <Compile Include="RussianGariParser.cs" />
+    <Compile Include="Solarix\AdjectiveCharacteristics.cs" />
+    <Compile Include="Solarix\SentenceElement.cs" />
+    <Compile Include="Solarix\SolarixRussianGrammarEngine.cs" />
+    <Compile Include="Solarix\_sg_api.cs" />
+    <Compile Include="Solarix\Tense.cs" />
+    <Compile Include="Solarix\VerbAspect.cs" />
+    <Compile Include="Solarix\VerbCharacteristics.cs" />
+    <Compile Include="Solarix\VerbForm.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
