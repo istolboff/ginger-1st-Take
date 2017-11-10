@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
 
 namespace Gari.Tests
@@ -180,7 +179,10 @@ namespace Gari.Tests
             {
                 foreach (var singleSentenceExpectation in expectedParsingResults)
                 {
-                    accumulatingAssert.AssertEqual(singleSentenceExpectation.Value, gariParser.ParseSentence(singleSentenceExpectation.Key).ToString());
+                    foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
+                    {
+                        accumulatingAssert.AssertEqual(singleSentenceExpectation.Value, gariParser.ParseSentence(inputStringVariation).ToString());
+                    }
                 }
             }
         }

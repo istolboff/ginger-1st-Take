@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="AccumulatingAssert.cs" />
     <Compile Include="BasicNaturalLanguageSentenceParsingTests.cs" />
+    <Compile Include="InputStringVariationGenerator.cs" />
+    <Compile Include="InputStringVariationGeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
