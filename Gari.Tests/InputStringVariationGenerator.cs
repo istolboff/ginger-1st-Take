@@ -6,7 +6,47 @@ namespace Gari.Tests
 {
     internal static class InputStringVariationGenerator
     {
-        internal static IEnumerable<string> GenerateVariations(string value)
+        public static IEnumerable<string> GenerateVariations(string value)
+        {
+            return from alternativesRealization in GenerateAlternativesCore(value)
+                   from singleVariantion in GenerateVariationsCore(alternativesRealization)
+                   select singleVariantion;
+        }
+
+        private static IEnumerable<string> GenerateAlternativesCore(string value)
+        {
+            var alternativesSpecifications = value
+                        .Select((ch, index) => new { ch, index })
+                        .Where(item => item.ch == '(')
+                        .Select(item =>
+                                    new
+                                    {
+                                        startIndex = item.index,
+                                        endIndex = value.IndexOf(')', item.index + 1)
+                                    })
+                        .Select(item => 
+                                    value
+                                        .Substring(item.startIndex + 1, item.endIndex - item.startIndex - 1)
+                                        .Split('|')
+                                        .Select(alternative => new { item.startIndex, item.endIndex, alternative })
+                                        .ToArray())
+                        .ToArray();
+
+            return Transpose(alternativesSpecifications)
+                        .Select(alternativesCombination =>
+                                alternativesCombination
+                                    .Reverse()
+                                    .Aggregate(
+                                        value,
+                                        (currentValue, singleAlternative) =>
+                                            ReplaceRangeWith(
+                                                currentValue,
+                                                singleAlternative.startIndex,
+                                                singleAlternative.endIndex - singleAlternative.startIndex + 1,
+                                                singleAlternative.alternative)));
+        }
+
+        private static IEnumerable<string> GenerateVariationsCore(string value)
         {
             var optionalElements = value
                         .Select((ch, index) => new { ch, index, followsSpace = index > 0 && value[index - 1] == ' ' })
@@ -34,14 +74,45 @@ namespace Gari.Tests
                                 .Aggregate(
                                     value,
                                     (currentValue, optionalElement) =>
-                                        currentValue
-                                            .Remove(optionalElement.startIndex, optionalElement.charsToRemove)
-                                            .Insert(
-                                                optionalElement.startIndex,
-                                                ((int)Math.Pow(2, optionalElement.index) & bitMask) != 0
-                                                    ? optionalElement.textToInsert
-                                                    : string.Empty))
+                                        ReplaceRangeWith(
+                                            currentValue,
+                                            optionalElement.startIndex, 
+                                            optionalElement.charsToRemove,
+                                            ((int)Math.Pow(2, optionalElement.index) & bitMask) != 0
+                                                ? optionalElement.textToInsert
+                                                : string.Empty))
                 select !value.StartsWith(" ") && result.StartsWith(" ") ? result.Substring(1) : result;
+        }
+
+        private static string ReplaceRangeWith(string value, int rangeStart, int rangeLength, string replaceWithThis)
+        {
+            return value.Remove(rangeStart, rangeLength).Insert(rangeStart, replaceWithThis);
+        }
+
+        private static IEnumerable<IEnumerable<T>> Transpose<T>(IEnumerable<IEnumerable<T>> sequence)
+        {
+            using (var sequenceEnumerator = sequence.GetEnumerator())
+            {
+                return TransposeCore(sequenceEnumerator);
+            }
+        }
+
+        private static IEnumerable<IEnumerable<T>> TransposeCore<T>(IEnumerator<IEnumerable<T>> sequenceEnumerator)
+        {
+            if (!sequenceEnumerator.MoveNext())
+            {
+                yield return new List<T>();
+            }
+            else
+            {
+                var currentElements = sequenceEnumerator.Current;
+                foreach (var result in from tailSequence in TransposeCore(sequenceEnumerator)
+                                       from element in currentElements
+                                       select new[] { element }.Concat(tailSequence))
+                {
+                    yield return result;
+                }
+            }
         }
     }
 }
