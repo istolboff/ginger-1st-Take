@@ -2,7 +2,7 @@
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
-    public sealed class LogicPredicate
+    public class LogicPredicate
     {
         public LogicPredicate(string predicateName, params LogicTerm[] logicTerms)
         {
