@@ -4,20 +4,29 @@ using System.Linq;
 using System.Reflection;
 using ParseOzhegovWithSolarix.Miscellaneous;
 using ParseOzhegovWithSolarix.Solarix;
+using System.Threading;
 
 namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 {
     internal static class Sentence
     {
+        public static IDictionary<ISentenceElementMatcher, ElementMatchingResult> MatchingResults
+        {
+            get
+            {
+                return MatchingResultsStorage.Value;
+            }
+        }
+
         public static SentenceStructureMonad<SentenceElementMatcher<TGrammarCharacteristics>> Root<TGrammarCharacteristics>(object expectedProperties)
             where TGrammarCharacteristics : GrammarCharacteristics
         {
             return new SentenceStructureMonad<SentenceElementMatcher<TGrammarCharacteristics>>(
-                new SentenceElementMatcher<TGrammarCharacteristics>(
-                    _ => _,
-                    expectedProperties, 
-                    new Dictionary<ISentenceElementMatcher, ElementMatchingResult>()));
+                new SentenceElementMatcher<TGrammarCharacteristics>(_ => _, expectedProperties, MatchingResults));
         }
+
+        private static readonly ThreadLocal<Dictionary<ISentenceElementMatcher, ElementMatchingResult>> MatchingResultsStorage =
+            new ThreadLocal<Dictionary<ISentenceElementMatcher, ElementMatchingResult>>(() => new Dictionary<ISentenceElementMatcher, ElementMatchingResult>());
     }
 
     internal interface ISentenceElementMatcher
@@ -106,7 +115,8 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             var result = new SentenceElementMatcher<TChildGrammarCharacteristics>(
                 rootElement =>
                     _getElementToMatch(rootElement)
-                        ?.Children?[nextChildIndex]
+                        ?.Children
+                        ?.TryGetAt(nextChildIndex)
                         ?.If(child => child.LeafLinkType == expectedLinkType),
                 expectedProperties,
                 _matchingResults);

@@ -9,5 +9,10 @@ namespace ParseOzhegovWithSolarix.Miscellaneous
         {
             return (@this as IReadOnlyCollection<T>) ?? @this.ToList();
         }
+
+        public static T TryGetAt<T>(this IList<T> @this, int index)
+        {
+            return index < @this.Count ? @this[index] : default(T);
+        }
     }
 }

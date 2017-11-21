@@ -22,7 +22,14 @@ namespace ParseOzhegovWithSolarix
             var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);
             foreach (var parsingVariant in sentenceStructure)
             {
-                var parsingResult = PrebuiltParsers.Select(parser => parser(parsingVariant)).FirstOrDefault(result => result.HasValue);
+                var parsingResult = PrebuiltParsers
+                    .Select(parser =>
+                    {
+                        Sentence.MatchingResults.Clear();
+                        return parser(parsingVariant);
+                    })
+                    .FirstOrDefault(result => result.HasValue);
+
                 if (parsingResult.HasValue)
                 {
                     return parsingResult.Value;
