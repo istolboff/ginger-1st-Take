@@ -172,6 +172,16 @@ namespace Gari.Tests
             });
         }
 
+        [TestMethod]
+        public void SomeSentencesThatShouldNotBeParsable()
+        {
+            var gariParser = new RussianGariParser();
+            foreach (var sentence in new[] { "Сократ стара", "Маша стар" })
+            {
+                Assert.IsNull(gariParser.ParseSentence(sentence));
+            }
+        }
+
         private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
         {
             var gariParser = new RussianGariParser();

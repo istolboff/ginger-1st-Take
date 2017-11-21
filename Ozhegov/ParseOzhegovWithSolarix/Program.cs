@@ -107,7 +107,7 @@ namespace ParseOzhegovWithSolarix
         {
             public bool Equals(SentenceElement x, SentenceElement y)
             {
-                if (x.LeafType != y.LeafType || x.Children.Count != y.Children.Count)
+                if (x.LeafLinkType != y.LeafLinkType || x.Children.Count != y.Children.Count)
                 {
                     return false;
                 }

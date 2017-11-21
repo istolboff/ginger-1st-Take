@@ -2,6 +2,11 @@
 using System.Linq;
 using ParseOzhegovWithSolarix.PredicateLogic;
 using ParseOzhegovWithSolarix.Solarix;
+using ParseOzhegovWithSolarix.SentenceStructureRecognizing;
+
+using Noun = ParseOzhegovWithSolarix.Solarix.NounCharacteristics;
+using Adjective = ParseOzhegovWithSolarix.Solarix.AdjectiveCharacteristics;
+using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix
 {
@@ -17,26 +22,13 @@ namespace ParseOzhegovWithSolarix
             var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);
             foreach (var parsingVariant in sentenceStructure)
             {
-                var firstRootLemma = parsingVariant.LemmaVersions.First();
-                if (firstRootLemma.PartOfSpeech == PartOfSpeech.Прилагательное &&
-                    ((AdjectiveCharacteristics)firstRootLemma.Characteristics).Number == Number.Единственное &&
-                    ((AdjectiveCharacteristics)firstRootLemma.Characteristics).AdjectiveForm == AdjectiveForm.Краткое &&
-                    ((AdjectiveCharacteristics)firstRootLemma.Characteristics).ComparisonForm == ComparisonForm.Атрибут)
+                var parsingResult = PrebuiltParsers.Select(parser => parser(parsingVariant)).FirstOrDefault(result => result.HasValue);
+                if (parsingResult.HasValue)
                 {
-                    if (parsingVariant.Children.Count == 1)
-                    {
-                        var singleChild = parsingVariant.Children.Single();
-                        var firstChildLemma = singleChild.LemmaVersions.First();
-                        if (singleChild.LeafType == LinkType.SUBJECT_link &&
-                            firstChildLemma.PartOfSpeech == PartOfSpeech.Существительное &&
-                            ((NounCharacteristics)firstChildLemma.Characteristics).Case == Case.Именительный &&
-                            ((NounCharacteristics)firstChildLemma.Characteristics).Number == Number.Единственное &&
-                            ((NounCharacteristics)firstChildLemma.Characteristics).Gender == ((AdjectiveCharacteristics)firstRootLemma.Characteristics).Gender)
-                        {
-                            return new LogicPredicate(firstRootLemma.Lemma, new LogicVariable(firstChildLemma.Lemma));
-                        }
-                    }
+                    return parsingResult.Value;
                 }
+
+                return null;
             }
 
             return null;
@@ -48,5 +40,24 @@ namespace ParseOzhegovWithSolarix
         }
 
         private readonly SolarixRussianGrammarEngine _russianGrammarEngine = new SolarixRussianGrammarEngine();
+
+        private static readonly Func<SentenceElement, Optional<LogicPredicate>>[] PrebuiltParsers = new[] 
+            {
+                // Сократ стар
+                from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
+                select new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)),
+
+                //from root in (Sentence.Root(new Punctuation { Content = "-" }) | Sentence.Root(new Pronoun2 { Content = "это" }))
+                //    from objectName in root.Subject(new Noun { Case = Case.Именительный, Number = Number.Единственное })
+                //    from setName in root.Rhema(new Noun { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
+                //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
+
+                //from root in Sentence.Root(new Punctuation { Content = "-" })
+                //    from objectName in root.Subject(new Noun { Case = Case.Именительный, Number = Number.Единственное })
+                //    from unused in root.NextCollocationItem(new Pronoun2 { Content = "это" })
+                //    from setName in root.Rhema(new Noun { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
+                //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)
+            };
     }
 }

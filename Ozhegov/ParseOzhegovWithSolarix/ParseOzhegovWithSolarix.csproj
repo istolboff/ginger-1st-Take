@@ -46,10 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Miscellaneous\BasicExtensions.cs" />
+    <Compile Include="Miscellaneous\Optional.cs" />
+    <Compile Include="Miscellaneous\Verify.cs" />
     <Compile Include="PredicateLogic\LogicPredicate.cs" />
     <Compile Include="PredicateLogic\LogicTerm.cs" />
     <Compile Include="PredicateLogic\LogicVariable.cs" />
     <Compile Include="PredicateLogic\SetContainsPredicate.cs" />
+    <Compile Include="SentenceStructureRecognizing\Sentence.cs" />
     <Compile Include="Solarix\AdjectiveForm.cs" />
     <Compile Include="Solarix\AdverbCharacteristics.cs" />
     <Compile Include="Solarix\Case.cs" />

@@ -1,5 +1,7 @@
-﻿using ParseOzhegovWithSolarix.Miscellaneous;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
@@ -9,9 +11,9 @@ namespace ParseOzhegovWithSolarix.Solarix
         {
             Content = content;
             Position = position;
-            LeafType = leafType;
+            LeafLinkType = leafType;
             LemmaVersions = lemmaVersions.AsImmutable();
-            Children = children.AsImmutable();
+            Children = new ReadOnlyCollection<SentenceElement>(children.ToList());
 
             System.Diagnostics.Trace.WriteLine(ToString());
         }
@@ -20,15 +22,15 @@ namespace ParseOzhegovWithSolarix.Solarix
 
         public int Position { get; }
 
-        public LinkType? LeafType { get; }
+        public LinkType? LeafLinkType { get; }
 
         public IReadOnlyCollection<LemmaVersion> LemmaVersions { get; }
 
-        public IReadOnlyCollection<SentenceElement> Children { get; }
+        public ReadOnlyCollection<SentenceElement> Children { get; }
 
         public override string ToString()
         {
-            return $"{Content} {LeafType} {string.Join(",", LemmaVersions)}";
+            return $"{Content} {LeafLinkType} {string.Join(",", LemmaVersions)}";
         }
     }
 }
