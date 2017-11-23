@@ -1,4 +1,4 @@
-﻿namespace ParseOzhegovWithSolarix
+﻿namespace ParseOzhegovWithSolarix.Solarix
 {
     public enum LinkType
     {

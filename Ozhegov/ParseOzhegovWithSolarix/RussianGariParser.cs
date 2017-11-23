@@ -52,18 +52,18 @@ namespace ParseOzhegovWithSolarix
             {
                 // Сократ стар
                 from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
+                    from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
                 select new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)),
 
-                //from root in (Sentence.Root(new Punctuation { Content = "-" }) | Sentence.Root(new Pronoun2 { Content = "это" }))
-                //    from objectName in root.Subject(new Noun { Case = Case.Именительный, Number = Number.Единственное })
-                //    from setName in root.Rhema(new Noun { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
+                //from root in (Sentence.Root(PartOfSpeech.Пунктуатор, "-" ) | Sentence.Root(PartOfSpeech.Местоим_Сущ, "это"))
+                //    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                //    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
                 //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
 
-                //from root in Sentence.Root(new Punctuation { Content = "-" })
-                //    from objectName in root.Subject(new Noun { Case = Case.Именительный, Number = Number.Единственное })
-                //    from unused in root.NextCollocationItem(new Pronoun2 { Content = "это" })
-                //    from setName in root.Rhema(new Noun { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
+                //from root in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                //    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                //    from unused in root.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                //    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
                 //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)
             };
     }

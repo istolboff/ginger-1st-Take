@@ -173,7 +173,7 @@ namespace Gari.Tests
         }
 
         [TestMethod]
-        public void SomeSentencesThatShouldNotBeParsable()
+        public void SomeSentencesShouldNotBeParsable()
         {
             var gariParser = new RussianGariParser();
             foreach (var sentence in new[] { "Сократ стара", "Маша стар" })

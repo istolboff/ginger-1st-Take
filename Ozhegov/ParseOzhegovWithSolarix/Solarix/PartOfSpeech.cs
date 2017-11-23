@@ -1,6 +1,6 @@
 ﻿using SolarixGrammarEngineNET;
 
-namespace ParseOzhegovWithSolarix
+namespace ParseOzhegovWithSolarix.Solarix
 {
     public enum PartOfSpeech
     {
