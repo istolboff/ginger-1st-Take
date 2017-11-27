@@ -10,7 +10,7 @@ namespace ParseOzhegovWithSolarix
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             using (var grammarEngine = new SolarixRussianGrammarEngine())
             {

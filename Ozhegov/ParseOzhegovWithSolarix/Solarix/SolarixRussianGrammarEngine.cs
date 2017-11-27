@@ -61,10 +61,10 @@ namespace ParseOzhegovWithSolarix.Solarix
                     throw new InvalidOperationException($"No graphs were parsed from the text: {text}.");
                 }
 
-                Trace.WriteLine($"ok.");
+                Trace.WriteLine("ok.");
 
                 return Enumerable.Range(1, GrammarEngine.sol_CountRoots(hPack, 0) - 2)
-                    .Select(i => CreateSentenceElement(hPack, GrammarEngine.sol_GetRoot(hPack, 0, i)))
+                    .Select(i => CreateSentenceElement(GrammarEngine.sol_GetRoot(hPack, 0, i)))
                     .AsImmutable();
             }
             finally
@@ -73,7 +73,7 @@ namespace ParseOzhegovWithSolarix.Solarix
             }
         }
 
-        private SentenceElement CreateSentenceElement(IntPtr hPack, IntPtr hNode, int? leafType = null)
+        private SentenceElement CreateSentenceElement(IntPtr hNode, int? leafType = null)
         {
             var content = new StringBuilder(LongestWordLength);
             GrammarEngine.sol_GetNodeContents(hNode, content);
@@ -103,11 +103,7 @@ namespace ParseOzhegovWithSolarix.Solarix
                         var stateName = new StringBuilder(100);
                         GrammarEngine.sol_GetCoordName(_engineHandle, id_coord, stateName);
                         var stateValue = new StringBuilder(100);
-                        if (GrammarEngine.sol_CountCoordStates(_engineHandle, id_coord) == 0)
-                        {
-                            continue;
-                        }
-                        else
+                        if (GrammarEngine.sol_CountCoordStates(_engineHandle, id_coord) != 0)
                         {
                             var coordState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, id_coord);
 
@@ -125,7 +121,6 @@ namespace ParseOzhegovWithSolarix.Solarix
 
             var children = Enumerable.Range(0, GrammarEngine.sol_CountLeafs(hNode))
                 .Select(leaveIndex => CreateSentenceElement(
-                    hPack, 
                     GrammarEngine.sol_GetLeaf(hNode, leaveIndex), 
                     GrammarEngine.sol_GetLeafLinkType(hNode, leaveIndex)));
 
@@ -154,20 +149,13 @@ namespace ParseOzhegovWithSolarix.Solarix
             return errorCode == 1 ? errorBuffer.ToString() : "Unknown error";
         }
 
-        private static string DefaultSolarixDictionaryXmlPath
-        {
-            get
-            {
-                return Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName, @"dictionary.xml"));
-            }
-        }
+        private static string DefaultSolarixDictionaryXmlPath => 
+            Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName, @"dictionary.xml"));
 
-        private static GrammarCharacteristics BuldGrammarCharacteristics(IntPtr hNode, int versionIndex, PartOfSpeech? partOfSpeech)
-        {
-            return partOfSpeech == null || !GrammarCharacteristicsBuilders.TryGetValue(partOfSpeech.Value, out var builder)
+        private static GrammarCharacteristics BuldGrammarCharacteristics(IntPtr hNode, int versionIndex, PartOfSpeech? partOfSpeech) => 
+            partOfSpeech == null || !GrammarCharacteristicsBuilders.TryGetValue(partOfSpeech.Value, out var builder)
                     ? new NullGrammarCharacteristics()
                     : builder(hNode, versionIndex);
-        }
 
         private static TState GetNodeVersionCoordinateState<TState>(IntPtr hNode, int versionIndex) where TState: struct 
         {

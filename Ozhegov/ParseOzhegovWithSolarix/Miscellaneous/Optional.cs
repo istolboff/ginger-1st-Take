@@ -2,9 +2,8 @@
 {
     internal class Optional<T> : IOptional<T>
     {
-        public Optional()
+        private Optional()
         {
-            HasValue = false;
         }
 
         public Optional(T value)

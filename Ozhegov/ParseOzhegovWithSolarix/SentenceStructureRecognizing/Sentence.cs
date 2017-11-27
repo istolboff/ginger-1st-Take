@@ -10,13 +10,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 {
     internal static class Sentence
     {
-        public static IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResults
-        {
-            get
-            {
-                return MatchingResultsStorage.Value;
-            }
-        }
+        public static IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResults => MatchingResultsStorage.Value;
 
         public static ISentenceElementMatcher<SentenceElementMatcher<TGrammarCharacteristics>> Root<TGrammarCharacteristics>(object expectedProperties)
             where TGrammarCharacteristics : GrammarCharacteristics
@@ -91,7 +85,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                 sentenceElement => left.Match(sentenceElement).OrElse(() => right.Match(sentenceElement)));
         }
 
-        public abstract LemmaVersion MatchCore(SentenceElement elementToMatch);
+        protected abstract LemmaVersion MatchCore(SentenceElement elementToMatch);
 
         protected abstract TResult This { get; }
 
@@ -150,37 +144,21 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             }
         }
 
-        public string Lemma
-        {
-            get
-            {
-                return Sentence.MatchingResults[this].LemmaVersion.Lemma;
-            }
-        }
+        public string Lemma => Sentence.MatchingResults[this].LemmaVersion.Lemma;
 
-        public TGrammarCharacteristics Detected
-        {
-            get
-            {
-                return (TGrammarCharacteristics)Sentence.MatchingResults[this].LemmaVersion.Characteristics;
-            }
-        }
+        public TGrammarCharacteristics Detected => (TGrammarCharacteristics)Sentence.MatchingResults[this].LemmaVersion.Characteristics;
 
-        public override LemmaVersion MatchCore(SentenceElement elementToMatch)
-        {
-            return _expectedContent != null && _expectedContent != elementToMatch.Content
+        protected override LemmaVersion MatchCore(SentenceElement elementToMatch) => 
+            _expectedContent != null && _expectedContent != elementToMatch.Content
                 ? null
                 : elementToMatch.LemmaVersions
                     .Where(lemmaVersion => lemmaVersion.Characteristics is TGrammarCharacteristics)
                     .FirstOrDefault(lemmaVersion => _matchGrammarCharacteristics((TGrammarCharacteristics)lemmaVersion.Characteristics));
-        }
 
         protected override SentenceElementMatcher<TGrammarCharacteristics> This => this; 
 
-        private static string GetExpectedContent(object expectedProperties)
-        {
-            return expectedProperties.GetType().GetProperty(ContentPropertyName, BindingFlags.Public | BindingFlags.Instance)?.GetValue(expectedProperties) as string;
-        }
+        private static string GetExpectedContent(object expectedProperties) => 
+            expectedProperties.GetType().GetProperty(ContentPropertyName, BindingFlags.Public | BindingFlags.Instance)?.GetValue(expectedProperties) as string;
 
         private static Predicate<TGrammarCharacteristics> BuildGrammarCharacteristicsMatcher(object expectedProperties)
         {
@@ -260,7 +238,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             _expectedContent = expectedContent;
         }
 
-        public override LemmaVersion MatchCore(SentenceElement elementToMatch)
+        protected override LemmaVersion MatchCore(SentenceElement elementToMatch)
         {
             return _expectedContent != elementToMatch.Content 
                 ? null
