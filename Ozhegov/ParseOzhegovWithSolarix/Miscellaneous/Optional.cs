@@ -1,7 +1,12 @@
 ﻿namespace ParseOzhegovWithSolarix.Miscellaneous
 {
-    internal struct Optional<T>
+    internal class Optional<T> : IOptional<T>
     {
+        public Optional()
+        {
+            HasValue = false;
+        }
+
         public Optional(T value)
         {
             _value = value;

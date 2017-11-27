@@ -191,7 +191,10 @@ namespace Gari.Tests
                 {
                     foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
                     {
-                        accumulatingAssert.AssertEqual(singleSentenceExpectation.Value, gariParser.ParseSentence(inputStringVariation).ToString());
+                        accumulatingAssert.AssertEqual(
+                            singleSentenceExpectation.Value, 
+                            gariParser.ParseSentence(inputStringVariation).ToString(), 
+                            $". Input: {inputStringVariation}");
                     }
                 }
             }

@@ -9,9 +9,6 @@
 
         public string Name { get; }
 
-        public override string ToString()
-        {
-            return Name.ToLower();
-        }
+        public override string ToString() => Name.ToLower();
     }
 }

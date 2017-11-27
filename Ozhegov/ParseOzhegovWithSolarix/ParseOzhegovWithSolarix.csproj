@@ -47,8 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Miscellaneous\BasicExtensions.cs" />
+    <Compile Include="Miscellaneous\IOptional.cs" />
     <Compile Include="Miscellaneous\Optional.cs" />
+    <Compile Include="Miscellaneous\OptionalExtensions.cs" />
+    <Compile Include="Miscellaneous\StringExtensions.cs" />
     <Compile Include="Miscellaneous\Verify.cs" />
+    <Compile Include="PredicateLogic\LogicConstant.cs" />
     <Compile Include="PredicateLogic\LogicPredicate.cs" />
     <Compile Include="PredicateLogic\LogicTerm.cs" />
     <Compile Include="PredicateLogic\LogicVariable.cs" />

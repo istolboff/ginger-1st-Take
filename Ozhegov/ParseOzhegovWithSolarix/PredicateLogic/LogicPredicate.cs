@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
@@ -7,12 +7,12 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
         public LogicPredicate(string predicateName, params LogicTerm[] logicTerms)
         {
             Name = predicateName;
-            LogicTerms = logicTerms;
+            LogicTerms = new ReadOnlyCollection<LogicTerm>(logicTerms);
         }
 
         public string Name { get; }
 
-        public IReadOnlyCollection<LogicTerm> LogicTerms { get; }
+        public ReadOnlyCollection<LogicTerm> LogicTerms { get; }
 
         public override string ToString()
         {

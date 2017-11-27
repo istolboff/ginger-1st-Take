@@ -3,19 +3,14 @@
     public sealed class SetContainsPredicate : LogicPredicate
     {
         public SetContainsPredicate(string setName, string objectName)
-            : base("∈", new LogicVariable(setName), new LogicVariable(objectName))
+            : base("∈", new LogicConstant(setName), new LogicVariable(objectName))
         {
-            SetName = setName;
-            ObjectName = objectName;
         }
 
-        public string SetName { get; }
+        public string SetName => LogicTerms[0].ToString();
 
-        public string ObjectName { get; }
+        public string ObjectName => LogicTerms[1].ToString();
 
-        public override string ToString()
-        {
-            return $"{ObjectName} ∈ set<{SetName}>";
-        }
+        public override string ToString() => $"{ObjectName} ∈ set<{SetName}>";
     }
 }

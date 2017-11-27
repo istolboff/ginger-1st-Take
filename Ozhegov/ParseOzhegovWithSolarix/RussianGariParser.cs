@@ -26,9 +26,9 @@ namespace ParseOzhegovWithSolarix
                     .Select(parser =>
                     {
                         Sentence.MatchingResults.Clear();
-                        return parser(parsingVariant);
+                        return parser.Match(parsingVariant);
                     })
-                    .FirstOrDefault(result => result.HasValue);
+                    .FirstOrDefault(result => result.HasValue) ?? Optional<LogicPredicate>.None;
 
                 if (parsingResult.HasValue)
                 {
@@ -48,23 +48,25 @@ namespace ParseOzhegovWithSolarix
 
         private readonly SolarixRussianGrammarEngine _russianGrammarEngine = new SolarixRussianGrammarEngine();
 
-        private static readonly Func<SentenceElement, Optional<LogicPredicate>>[] PrebuiltParsers = new[] 
+        private static readonly ISentenceElementMatcher<LogicPredicate>[] PrebuiltParsers = new ISentenceElementMatcher<LogicPredicate>[] 
             {
                 // Сократ стар
                 from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                     from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
                 select new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)),
 
-                //from root in (Sentence.Root(PartOfSpeech.Пунктуатор, "-" ) | Sentence.Root(PartOfSpeech.Местоим_Сущ, "это"))
-                //    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                //    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
-                //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
+                // Сократ (-|это) человек
+                from root in (Sentence.Root(PartOfSpeech.Пунктуатор, "-" ) | Sentence.Root(PartOfSpeech.Местоим_Сущ, "это"))
+                    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Detected.Gender })
+                select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
 
-                //from root in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
-                //    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                //    from unused in root.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
-                //    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Gender })
-                //select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)
+                // Сократ - это человек
+                from root in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                    from unused in root.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                    from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Detected.Gender })
+                select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)
             };
     }
 }

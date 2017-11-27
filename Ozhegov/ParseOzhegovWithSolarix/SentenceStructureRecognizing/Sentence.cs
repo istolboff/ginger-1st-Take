@@ -10,7 +10,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 {
     internal static class Sentence
     {
-        public static IDictionary<SentenceElementMatcherBase, ElementMatchingResult> MatchingResults
+        public static IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResults
         {
             get
             {
@@ -18,93 +18,125 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             }
         }
 
-        public static SentenceStructureMonad<SentenceElementMatcher<TGrammarCharacteristics>> Root<TGrammarCharacteristics>(object expectedProperties)
+        public static ISentenceElementMatcher<SentenceElementMatcher<TGrammarCharacteristics>> Root<TGrammarCharacteristics>(object expectedProperties)
             where TGrammarCharacteristics : GrammarCharacteristics
         {
-            return new SentenceStructureMonad<SentenceElementMatcher<TGrammarCharacteristics>>(
-                new SentenceElementMatcher<TGrammarCharacteristics>(_ => _, expectedProperties, MatchingResults));
+            return new SentenceElementMatcher<TGrammarCharacteristics>(_ => _, expectedProperties);
         }
 
-        public static SentenceStructureMonad<PartOfSpeechMatcher> Root(PartOfSpeech partOfSpeech, string content)
+        public static PartOfSpeechMatcher Root(PartOfSpeech partOfSpeech, string content)
         {
-            return new SentenceStructureMonad<PartOfSpeechMatcher>(
-                new PartOfSpeechMatcher(_ => _, partOfSpeech, content, MatchingResults));
+            return new PartOfSpeechMatcher(_ => _, partOfSpeech, content);
         }
 
-        private static readonly ThreadLocal<Dictionary<SentenceElementMatcherBase, ElementMatchingResult>> MatchingResultsStorage =
-            new ThreadLocal<Dictionary<SentenceElementMatcherBase, ElementMatchingResult>>(() => new Dictionary<SentenceElementMatcherBase, ElementMatchingResult>());
+        private static readonly ThreadLocal<Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>> MatchingResultsStorage =
+            new ThreadLocal<Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>>(
+                   () => new Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>());
     }
 
-    internal abstract class SentenceElementMatcherBase
+    internal interface ISentenceElementMatcher<out TResult>
     {
-        protected SentenceElementMatcherBase(
-            Func<SentenceElement, SentenceElement> getElementToMatch,
-            IDictionary<SentenceElementMatcherBase, ElementMatchingResult> matchingResults)
+        IOptional<TResult> Match(SentenceElement rootSentenceElement);
+    }
+
+    internal abstract class SentenceElementMatcherBase<TResult> : ISentenceElementMatcher<TResult> 
+        where TResult : SentenceElementMatcherBase<TResult>
+    {
+        protected SentenceElementMatcherBase(Func<SentenceElement, SentenceElement> getElementToMatch)
         {
             _getElementToMatch = getElementToMatch;
-            MatchingResults = matchingResults;
         }
 
-        public SentenceStructureMonad<SentenceElementMatcher<TChildGrammarCharacteristics>> Subject<TChildGrammarCharacteristics>(object expectedProperties)
+        public SentenceElementMatcher<TChildGrammarCharacteristics> Subject<TChildGrammarCharacteristics>(object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
-            return new SentenceStructureMonad<SentenceElementMatcher<TChildGrammarCharacteristics>>(
-                AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.SUBJECT_link, expectedProperties));
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.SUBJECT_link, expectedProperties);
         }
 
-        public bool Match(SentenceElement rootSentenceElement)
+        public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
+        }
+
+        public SentenceElementMatcher<TChildGrammarCharacteristics> Rhema<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.RHEMA_link, expectedProperties);
+        }
+
+        public IOptional<TResult> Match(SentenceElement rootSentenceElement)
         {
             var elementToMatch = _getElementToMatch(rootSentenceElement);
             if (elementToMatch == null)
             {
-                return false;
+                return Optional<TResult>.None;
             }
 
             var matchingLemma = MatchCore(elementToMatch);
             if (matchingLemma == null)
             {
-                return false;
+                return Optional<TResult>.None;
             }
 
-            MatchingResults.Add(this, new ElementMatchingResult(elementToMatch.Content, matchingLemma));
+            Sentence.MatchingResults.Add(this, new ElementMatchingResult(elementToMatch.Content, matchingLemma));
 
-            return _childElementMatchers.All(matcher => matcher.Match(rootSentenceElement));
+            return new Optional<TResult>(This);
         }
 
-        protected IDictionary<SentenceElementMatcherBase, ElementMatchingResult> MatchingResults { get; }
+        public static ISentenceElementMatcher<TResult> operator |(
+            SentenceElementMatcherBase<TResult> left, 
+            SentenceElementMatcherBase<TResult> right)
+        {
+            return new FunctorBasedMatcher<TResult>(
+                sentenceElement => left.Match(sentenceElement).OrElse(() => right.Match(sentenceElement)));
+        }
 
-        protected abstract LemmaVersion MatchCore(SentenceElement elementToMatch);
+        public abstract LemmaVersion MatchCore(SentenceElement elementToMatch);
+
+        protected abstract TResult This { get; }
 
         private SentenceElementMatcher<TChildGrammarCharacteristics> AddChildElementMatcher<TChildGrammarCharacteristics>(
             LinkType expectedLinkType,
             object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
-            var nextChildIndex = _childElementMatchers.Count;
-            var result = new SentenceElementMatcher<TChildGrammarCharacteristics>(
+            var currentChildIndex = _nextChildIndex++;
+            return new SentenceElementMatcher<TChildGrammarCharacteristics>(
                 rootElement =>
                     _getElementToMatch(rootElement)
                         ?.Children
-                        ?.TryGetAt(nextChildIndex)
+                        ?.TryGetAt(currentChildIndex)
                         ?.If(child => child.LeafLinkType == expectedLinkType),
-                expectedProperties,
-                MatchingResults);
-            _childElementMatchers.Add(result);
-            return result;
+                expectedProperties);
+        }
+
+        private PartOfSpeechMatcher AddChildElementMatcher(
+            LinkType expectedLinkType, 
+            PartOfSpeech partOfSpeech, 
+            string content)
+        {
+            var currentChildIndex = _nextChildIndex++;
+            return new PartOfSpeechMatcher(
+                rootElement =>
+                    _getElementToMatch(rootElement)
+                        ?.Children
+                        ?.TryGetAt(currentChildIndex)
+                        ?.If(child => child.LeafLinkType == expectedLinkType),
+                partOfSpeech, 
+                content);
         }
 
         private readonly Func<SentenceElement, SentenceElement> _getElementToMatch;
-        private readonly List<SentenceElementMatcherBase> _childElementMatchers = new List<SentenceElementMatcherBase>();
+        private int _nextChildIndex;
     }
 
-    internal sealed class SentenceElementMatcher<TGrammarCharacteristics> : SentenceElementMatcherBase
+    internal sealed class SentenceElementMatcher<TGrammarCharacteristics> : SentenceElementMatcherBase<SentenceElementMatcher<TGrammarCharacteristics>>
         where TGrammarCharacteristics : GrammarCharacteristics
     {
         public SentenceElementMatcher(
             Func<SentenceElement, SentenceElement> getElementToMatch,
-            object expectedProperties,
-            IDictionary<SentenceElementMatcherBase, ElementMatchingResult> matchingResults)
-            : base(getElementToMatch, matchingResults)
+            object expectedProperties)
+            : base(getElementToMatch)
         {
             _expectedContent = GetExpectedContent(expectedProperties);
             _matchGrammarCharacteristics = BuildGrammarCharacteristicsMatcher(expectedProperties);
@@ -114,7 +146,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         {
             get
             {
-                return MatchingResults[this].Content;
+                return Sentence.MatchingResults[this].Content;
             }
         }
 
@@ -122,7 +154,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         {
             get
             {
-                return MatchingResults[this].LemmaVersion.Lemma;
+                return Sentence.MatchingResults[this].LemmaVersion.Lemma;
             }
         }
 
@@ -130,11 +162,11 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         {
             get
             {
-                return (TGrammarCharacteristics)MatchingResults[this].LemmaVersion.Characteristics;
+                return (TGrammarCharacteristics)Sentence.MatchingResults[this].LemmaVersion.Characteristics;
             }
         }
 
-        protected override LemmaVersion MatchCore(SentenceElement elementToMatch)
+        public override LemmaVersion MatchCore(SentenceElement elementToMatch)
         {
             return _expectedContent != null && _expectedContent != elementToMatch.Content
                 ? null
@@ -142,6 +174,8 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                     .Where(lemmaVersion => lemmaVersion.Characteristics is TGrammarCharacteristics)
                     .FirstOrDefault(lemmaVersion => _matchGrammarCharacteristics((TGrammarCharacteristics)lemmaVersion.Characteristics));
         }
+
+        protected override SentenceElementMatcher<TGrammarCharacteristics> This => this; 
 
         private static string GetExpectedContent(object expectedProperties)
         {
@@ -214,28 +248,44 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         private const string ContentPropertyName = "Content";
     }
 
-    internal sealed class PartOfSpeechMatcher : SentenceElementMatcherBase
+    internal sealed class PartOfSpeechMatcher : SentenceElementMatcherBase<PartOfSpeechMatcher>
     {
         public PartOfSpeechMatcher(
             Func<SentenceElement, SentenceElement> getElementToMatch, 
             PartOfSpeech expectedPartOfSpeech, 
-            string expectedContent, 
-            IDictionary<SentenceElementMatcherBase, ElementMatchingResult> matchingResults)
-            : base(getElementToMatch, matchingResults)
+            string expectedContent)
+            : base(getElementToMatch)
         {
             _expectedPartOfSpeech = expectedPartOfSpeech;
             _expectedContent = expectedContent;
         }
 
-        protected override LemmaVersion MatchCore(SentenceElement elementToMatch)
+        public override LemmaVersion MatchCore(SentenceElement elementToMatch)
         {
             return _expectedContent != elementToMatch.Content 
                 ? null
                 : elementToMatch.LemmaVersions.FirstOrDefault(lemmaVersion => lemmaVersion.PartOfSpeech == _expectedPartOfSpeech);
         }
 
+        protected override PartOfSpeechMatcher This => this; 
+
         private readonly PartOfSpeech _expectedPartOfSpeech;
         private readonly string _expectedContent;
+    }
+
+    internal sealed class FunctorBasedMatcher<TResult> : ISentenceElementMatcher<TResult>
+    {
+        public FunctorBasedMatcher(Func<SentenceElement, IOptional<TResult>> matchElement)
+        {
+            _matchElement = matchElement;
+        }
+
+        public IOptional<TResult> Match(SentenceElement rootSentenceElement)
+        {
+            return _matchElement(rootSentenceElement);
+        }
+
+        private readonly Func<SentenceElement, IOptional<TResult>> _matchElement;
     }
 
     internal struct ElementMatchingResult
@@ -251,33 +301,28 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         public LemmaVersion LemmaVersion { get; }
     }
 
-    internal sealed class SentenceStructureMonad<TMatcher>
-        where TMatcher : SentenceElementMatcherBase
+    internal static class SentenceStructureMonad
     {
-        public SentenceStructureMonad(TMatcher matcher)
+        public static ISentenceElementMatcher<TResult> SelectMany<TInput, TIntermediate, TResult>(
+            this ISentenceElementMatcher<TInput> @this,
+            Func<TInput, ISentenceElementMatcher<TIntermediate>> selector,
+            Func<TInput, TIntermediate, TResult> projector)
         {
-            _matcher = matcher;
+            return new FunctorBasedMatcher<TResult>(
+                    rootSentence =>
+                    {
+                        var firstMatch = @this.Match(rootSentence);
+                        if (!firstMatch.HasValue)
+                        {
+                            return Optional<TResult>.None;
+                        }
+
+                        var intermediateMatcher = selector(firstMatch.Value);
+                        var intermediateMatch = intermediateMatcher.Match(rootSentence);
+                        return intermediateMatch.HasValue
+                            ? new Optional<TResult>(projector(firstMatch.Value, intermediateMatch.Value)) 
+                            : Optional<TResult>.None;
+                    });
         }
-
-        public Func<SentenceElement, Optional<TResult>> SelectMany<TIntermediateMatcher, TResult>(
-            Func<TMatcher, SentenceStructureMonad<TIntermediateMatcher>> selector,
-            Func<TMatcher, TIntermediateMatcher, TResult> projector)
-            where TIntermediateMatcher : SentenceElementMatcherBase
-        {
-            return rootSentence =>
-            {
-                if (!_matcher.Match(rootSentence))
-                {
-                    return Optional<TResult>.None;
-                }
-
-                var intermediateMatcher = selector(_matcher);
-                return intermediateMatcher._matcher.Match(rootSentence) 
-                    ? new Optional<TResult>(projector(_matcher, intermediateMatcher._matcher)) 
-                    : Optional<TResult>.None;
-            };
-        }
-
-        private readonly TMatcher _matcher;
     }
 }
