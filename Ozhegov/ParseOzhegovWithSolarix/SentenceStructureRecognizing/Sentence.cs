@@ -136,13 +136,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             _matchGrammarCharacteristics = BuildGrammarCharacteristicsMatcher(expectedProperties);
         }
 
-        public string Content
-        {
-            get
-            {
-                return Sentence.MatchingResults[this].Content;
-            }
-        }
+        public string Content => Sentence.MatchingResults[this].Content;
 
         public string Lemma => Sentence.MatchingResults[this].LemmaVersion.Lemma;
 

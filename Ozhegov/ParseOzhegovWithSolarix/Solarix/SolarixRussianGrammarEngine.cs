@@ -95,24 +95,24 @@ namespace ParseOzhegovWithSolarix.Solarix
                     var partOfSpeechIndex = GrammarEngine.sol_GetEntryClass(_engineHandle, entryVersionId);
                     var partOfSpeech = partOfSpeechIndex < 0 ? (PartOfSpeech?)null : (PartOfSpeech)partOfSpeechIndex;
                     var grammarCharacteristcs = BuldGrammarCharacteristics(hNode, versionIndex, partOfSpeech);
-                    foreach (var id_coord in new[] { GrammarEngineAPI.CASE_ru, GrammarEngineAPI.NUMBER_ru, GrammarEngineAPI.GENDER_ru,
+                    foreach (var coordinateId in new[] { GrammarEngineAPI.CASE_ru, GrammarEngineAPI.NUMBER_ru, GrammarEngineAPI.GENDER_ru,
                                                  GrammarEngineAPI.VERB_FORM_ru, GrammarEngineAPI.PERSON_ru, GrammarEngineAPI.ASPECT_ru,
                                                  GrammarEngineAPI.TENSE_ru, GrammarEngineAPI.SHORTNESS_ru,
                                                  GrammarEngineAPI.FORM_ru, GrammarEngineAPI.COMPAR_FORM_ru })
                     {
                         var stateName = new StringBuilder(100);
-                        GrammarEngine.sol_GetCoordName(_engineHandle, id_coord, stateName);
+                        GrammarEngine.sol_GetCoordName(_engineHandle, coordinateId, stateName);
                         var stateValue = new StringBuilder(100);
-                        if (GrammarEngine.sol_CountCoordStates(_engineHandle, id_coord) != 0)
+                        if (GrammarEngine.sol_CountCoordStates(_engineHandle, coordinateId) != 0)
                         {
-                            var coordState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, id_coord);
+                            var coordState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, coordinateId);
 
                             if (coordState < 0)
                             {
                                 continue;
                             }
 
-                            GrammarEngine.sol_GetCoordStateName(_engineHandle, id_coord, coordState, stateValue);
+                            GrammarEngine.sol_GetCoordStateName(_engineHandle, coordinateId, coordState, stateValue);
                         }
                     }
 
