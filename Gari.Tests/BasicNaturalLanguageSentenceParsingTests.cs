@@ -16,6 +16,7 @@ namespace Gari.Tests
                 { "Сократ стар", "СТАРЫЙ(сократ)" },
                 { "Сократ (-|[-] это) человек", "сократ ∈ set<Человек>" },
                 { "Сократ является человеком", "сократ ∈ set<Человек>" },
+                { "Жанна является человеком", "жанна ∈ set<Человек>" },
                 { "Вода кипит", "КИПИТ(вода)" }, 
               // ¬P(x) 
                 { "Сократ не стар", "¬СТАР(сократ)" },
@@ -34,7 +35,10 @@ namespace Gari.Tests
               // (∀ x) x ∈ S ⇒ P(x) 
                 { "(каждый|любой) человек смертен", "(∀ x) x ∈ set<Человек> ⇒ СМЕРТЕН(x)" },
                 { "все люди смертны", "(∀ x) x ∈ set<Человек> ⇒ СМЕРТЕН(x)" },
-                { "все лебеди белые", "(∀ x) x ∈ set<Лебедь> ⇒ БЕЛЫЙ(x)" }, 
+                { "все лебеди белые", "(∀ x) x ∈ set<Лебедь> ⇒ БЕЛЫЙ(x)" },
+                // (∀ x) x ∈ S ⇒ x ∈ T
+                { "Лебеди являются птицами", "(∀ x) x ∈ set<Лебедь> ⇒ x ∈ set<Птица>" },
+                { "Лебеди[-] это птицы", "(∀ x) x ∈ set<Лебедь> ⇒ x ∈ set<Птица>" },
               // (∃ x) x ∈ S ⇒ P(x) 
                 { "существует живой композитор", "(∃ x) x ∈ set<Композитор> & ЖИВОЙ(x)" },
                 { "существуют живые композиторы", "(∃ x) x ∈ set<Композитор> & ЖИВОЙ(x)" },
@@ -191,9 +195,11 @@ namespace Gari.Tests
                 {
                     foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
                     {
+                        var sentenceParsingResult = gariParser.ParseSentence(inputStringVariation);
+                        Assert.IsNotNull(sentenceParsingResult, $"{inputStringVariation} failed to be parsed.");
                         accumulatingAssert.AssertEqual(
-                            singleSentenceExpectation.Value, 
-                            gariParser.ParseSentence(inputStringVariation).ToString(), 
+                            singleSentenceExpectation.Value,
+                            sentenceParsingResult.ToString(), 
                             $". Input: {inputStringVariation}");
                     }
                 }

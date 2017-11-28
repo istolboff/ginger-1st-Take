@@ -170,6 +170,13 @@ namespace ParseOzhegovWithSolarix.Solarix
             return (TState)(object)coordinateState;
         }
 
+        private static TState? TryGetNodeVersionCoordinateState<TState>(IntPtr hNode, int versionIndex) where TState : struct
+        {
+            var coordinateId = CoordinateStateTypeToCoordinateIdMap[typeof(TState)];
+            var coordinateState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, coordinateId);
+            return (coordinateState < 0) ? (TState?)null : (TState)(object)coordinateState;
+        }
+
         private IntPtr _engineHandle;
 
         private static readonly IDictionary<PartOfSpeech, Func<IntPtr, int, GrammarCharacteristics>> GrammarCharacteristicsBuilders = 
@@ -188,7 +195,7 @@ namespace ParseOzhegovWithSolarix.Solarix
                     PartOfSpeech.Глагол,
                     (hNode, versionIndex) =>
                         new VerbCharacteristics(
-                            GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                            TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<VerbForm>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Person>(hNode, versionIndex),
