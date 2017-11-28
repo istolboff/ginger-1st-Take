@@ -29,6 +29,11 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
         }
 
+        public PartOfSpeechMatcher NegationParticle(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.NEGATION_PARTICLE_link, partOfSpeech, content);
+        }
+
         public SentenceElementMatcher<TChildGrammarCharacteristics> Rhema<TChildGrammarCharacteristics>(object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {

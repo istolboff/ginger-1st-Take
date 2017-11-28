@@ -49,7 +49,13 @@ namespace ParseOzhegovWithSolarix
                     // Вода кипит
                     from root in Sentence.Root<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
                         from subject in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                    select new LogicPredicate(root.Lemma, new LogicVariable(subject.Lemma))
+                    select new LogicPredicate(root.Lemma, new LogicVariable(subject.Lemma)),
+
+                    // Сократ не стар
+                    from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                        from unused in predicate.NegationParticle(PartOfSpeech.Частица, "не")
+                        from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
+                    select new NegatedPredicate(new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)))
                 };
 
             var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);

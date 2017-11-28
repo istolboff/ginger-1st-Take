@@ -57,6 +57,7 @@
     <Compile Include="PredicateLogic\LogicPredicate.cs" />
     <Compile Include="PredicateLogic\LogicTerm.cs" />
     <Compile Include="PredicateLogic\LogicVariable.cs" />
+    <Compile Include="PredicateLogic\NegatedPredicate.cs" />
     <Compile Include="PredicateLogic\SetContainsPredicate.cs" />
     <Compile Include="SentenceStructureRecognizing\ElementMatchingResult.cs" />
     <Compile Include="SentenceStructureRecognizing\FunctorBasedMatcher.cs" />
