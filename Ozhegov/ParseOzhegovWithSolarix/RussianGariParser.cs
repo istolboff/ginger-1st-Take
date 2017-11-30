@@ -108,7 +108,60 @@ namespace ParseOzhegovWithSolarix
                                 from стар in что.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                                     from сократ in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                     where сократ.Detected.Gender == стар.Detected.Gender
-                    select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicVariable(сократ.Lemma)))
+                    select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicVariable(сократ.Lemma))),
+
+                    // неверно, что Сократ человек
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from человек in что.NextCollocationItem<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from сократ in человек.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // неверно, что Сократ - человек
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from dash in что.NextCollocationItem(PartOfSpeech.Пунктуатор, "-")
+                                    from сократ in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное})
+                                    from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // неверно, что Сократ это человек
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from это in что.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                                    from сократ in это.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from человек in это.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // неверно, что Сократ - это человек
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from dash in что.NextCollocationItem(PartOfSpeech.Пунктуатор, "-")
+                                    from это in dash.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                                    from сократ in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // неверно, что Сократ является человеком
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from является in что.NextCollocationItem<Verb>(new { Case = Case.Дательный, Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                                    from человеком in является.Object<Noun>(new { Case = Case.Творительный, Number = Number.Единственное })
+                                    from сократ in является.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человеком.Lemma)),
+
+                    // неверно, что вода кипит
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from кипит in что.NextCollocationItem<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                                    from вода in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicVariable(вода.Lemma)))
                 };
 
             var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);
