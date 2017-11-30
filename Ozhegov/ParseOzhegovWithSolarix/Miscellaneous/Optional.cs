@@ -1,6 +1,6 @@
 ﻿namespace ParseOzhegovWithSolarix.Miscellaneous
 {
-    internal class Optional<T> : IOptional<T>
+    public class Optional<T> : IOptional<T>
     {
         private Optional()
         {

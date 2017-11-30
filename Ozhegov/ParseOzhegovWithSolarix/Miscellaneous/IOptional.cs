@@ -1,6 +1,6 @@
 ﻿namespace ParseOzhegovWithSolarix.Miscellaneous
 {
-    interface IOptional<out T>
+    public interface IOptional<out T>
     {
         bool HasValue { get; }
 

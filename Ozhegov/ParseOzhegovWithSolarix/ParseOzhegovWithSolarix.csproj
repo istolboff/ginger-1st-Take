@@ -76,6 +76,7 @@
     <Compile Include="Solarix\GerundCharacteristics.cs" />
     <Compile Include="Solarix\GrammarCharacteristics.cs" />
     <Compile Include="Miscellaneous\CollectionExtensions.cs" />
+    <Compile Include="Solarix\IRussianGrammarParser.cs" />
     <Compile Include="Solarix\LemmaVersion.cs" />
     <Compile Include="Solarix\LinkType.cs" />
     <Compile Include="Solarix\NounCharacteristics.cs" />

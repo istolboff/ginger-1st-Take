@@ -9,7 +9,7 @@ using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
-    public sealed class SolarixRussianGrammarEngine : IDisposable
+    public sealed class SolarixRussianGrammarEngine : IRussianGrammarParser, IDisposable
     {
         public SolarixRussianGrammarEngine()
         {
