@@ -11,9 +11,15 @@ namespace Gari.Tests
     {
         public void AssertEqual(string expectedValue, string actualValue, string extraInfo = null)
         {
+            Assert.AreEqual(expectedValue, actualValue, extraInfo);
+
             if (expectedValue != actualValue)
             {
                 _failedAssertions.Add($"Expected: {expectedValue}, Actual: {actualValue} {extraInfo}");
+            }
+            else
+            {
+                Trace.WriteLine($"Assert.AreEqual({expectedValue}, {actualValue}) succeeded. {extraInfo}");
             }
         }
 

@@ -1,4 +1,6 @@
-﻿namespace ParseOzhegovWithSolarix.PredicateLogic
+﻿using System;
+
+namespace ParseOzhegovWithSolarix.PredicateLogic
 {
     public sealed class SetContainsPredicate : LogicPredicate
     {
@@ -12,5 +14,8 @@
         public string ObjectName => LogicTerms[1].ToString();
 
         public override string ToString() => $"{ObjectName} ∈ set<{SetName}>";
+
+        public override string ToString(string format, IFormatProvider formatProvider) => 
+            format == "N" ? $"({ToString()})" : ToString();
     }
 }

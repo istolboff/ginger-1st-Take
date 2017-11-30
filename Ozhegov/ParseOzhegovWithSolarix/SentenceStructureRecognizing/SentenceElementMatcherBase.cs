@@ -29,10 +29,23 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
         }
 
+        public SentenceElementMatcher<TChildGrammarCharacteristics> NextCollocationItem<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.NEXT_COLLOCATION_ITEM_link, expectedProperties);
+        }
+
+        public PartOfSpeechMatcher NextClause(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.NEXT_CLAUSE_link, partOfSpeech, content);
+        }
+
         public PartOfSpeechMatcher NegationParticle(PartOfSpeech partOfSpeech, string content)
         {
             return AddChildElementMatcher(LinkType.NEGATION_PARTICLE_link, partOfSpeech, content);
         }
+
+        // public NextClause()
 
         public SentenceElementMatcher<TChildGrammarCharacteristics> Rhema<TChildGrammarCharacteristics>(object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics

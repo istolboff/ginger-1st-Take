@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using SolarixGrammarEngineNET;
 using ParseOzhegovWithSolarix.Miscellaneous;
-using System.Diagnostics;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
@@ -38,7 +37,6 @@ namespace ParseOzhegovWithSolarix.Solarix
 
         public IReadOnlyCollection<SentenceElement> Parse(string text)
         {
-            Trace.Write($"parsing {text}...  ");
             IntPtr hPack = IntPtr.Zero;
             try
             {
@@ -60,8 +58,6 @@ namespace ParseOzhegovWithSolarix.Solarix
                 {
                     throw new InvalidOperationException($"No graphs were parsed from the text: {text}.");
                 }
-
-                Trace.WriteLine("ok.");
 
                 return Enumerable.Range(1, GrammarEngine.sol_CountRoots(hPack, 0) - 2)
                     .Select(i => CreateSentenceElement(GrammarEngine.sol_GetRoot(hPack, 0, i)))

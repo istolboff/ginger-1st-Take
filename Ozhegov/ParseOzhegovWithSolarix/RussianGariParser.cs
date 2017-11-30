@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ParseOzhegovWithSolarix.PredicateLogic;
 using ParseOzhegovWithSolarix.Solarix;
@@ -30,14 +31,14 @@ namespace ParseOzhegovWithSolarix
                     // Сократ (-|это) человек
                     from root in (Sentence.Root(PartOfSpeech.Пунктуатор, "-" ) | Sentence.Root(PartOfSpeech.Местоим_Сущ, "это"))
                         from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                        from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Detected.Gender })
+                        from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                     select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
 
                     // Сократ - это человек
                     from root in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
                         from unused in root.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
                         from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                        from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = objectName.Detected.Gender })
+                        from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                     select new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma),
 
                     // Сократ является человеком
@@ -55,7 +56,56 @@ namespace ParseOzhegovWithSolarix
                     from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                         from unused in predicate.NegationParticle(PartOfSpeech.Частица, "не")
                         from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
-                    select new NegatedPredicate(new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)))
+                    select new NegatedPredicate(new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma))),
+
+                    // Сократ не человек
+                    from setName in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from unused in setName.NegationParticle(PartOfSpeech.Частица, "не")
+                        from objectName in setName.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)),
+
+                    // Сократ - не человек
+                    from root in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                        from unused in root.NegationParticle(PartOfSpeech.Частица, "не")
+                        from objectName in root.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from setName in root.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: objectName.Lemma, setName: setName.Lemma)),
+
+                    // Сократ это не человек
+                    from это in Sentence.Root(PartOfSpeech.Местоим_Сущ, "это")
+                        from сократ in это.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from человек in это.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                            from не in человек.NegationParticle(PartOfSpeech.Частица, "не")
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // Сократ - это не человек
+                    from dash in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                        from это in dash.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                        from сократ in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                            from не in человек.NegationParticle(PartOfSpeech.Частица, "не")
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человек.Lemma)),
+
+                    // Сократ не является человеком
+                    from является in Sentence.Root<Verb>(new { Case = Case.Дательный, Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                        from не in является.NegationParticle(PartOfSpeech.Частица, "не")
+                        from человеком in является.Object<Noun>(new { Case = Case.Творительный, Number = Number.Единственное })
+                        from сократ in является.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new SetContainsPredicate(objectName: сократ.Lemma, setName: человеком.Lemma)),
+
+                    // Вода не кипит
+                    from кипит in Sentence.Root<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                        from не in кипит.NegationParticle(PartOfSpeech.Частица, "не")
+                        from вода in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicVariable(вода.Lemma))),
+
+                    // неверно, что Сократ стар
+                    from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                        from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                            from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                                from стар in что.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                                    from сократ in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = стар.Detected.Gender })
+                    select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicVariable(сократ.Lemma)))
                 };
 
             var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);
@@ -65,7 +115,8 @@ namespace ParseOzhegovWithSolarix
                     .Select(parser =>
                     {
                         Sentence.MatchingResults.Clear();
-                        return parser.Match(parsingVariant);
+                        var result = parser.Match(parsingVariant);
+                        return AllInputElementsAreMatched(parsingVariant, Sentence.MatchingResults.Values) ? result : Optional<LogicPredicate>.None;
                     })
                     .FirstOrDefault(result => result.HasValue) ?? Optional<LogicPredicate>.None;
 
@@ -74,7 +125,7 @@ namespace ParseOzhegovWithSolarix
                     return parsingResult.Value;
                 }
 
-                return null;
+                TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton(sentenceText, parsingVariant);
             }
 
             return null;
@@ -83,6 +134,16 @@ namespace ParseOzhegovWithSolarix
         public void Dispose()
         {
             _russianGrammarEngine.Dispose();
+        }
+
+        private static bool AllInputElementsAreMatched(SentenceElement sentenceElement, ICollection<ElementMatchingResult> elementMatchingResults)
+        {
+            return
+                sentenceElement.LemmaVersions.Any(
+                    inputLemmaVersion => elementMatchingResults.Any(
+                        result => ReferenceEquals(result.LemmaVersion, inputLemmaVersion))) &&
+                sentenceElement.Children.All(
+                    childElement => AllInputElementsAreMatched(childElement, elementMatchingResults));
         }
 
         private readonly SolarixRussianGrammarEngine _russianGrammarEngine = new SolarixRussianGrammarEngine();

@@ -8,5 +8,12 @@ namespace ParseOzhegovWithSolarix.Miscellaneous
         {
             return filter(value) ? value : default(T);
         }
+
+        public static bool IsOneOf<T>(this T value, T firstValue, T secondValue, params T[] allOtherValues)
+        {
+            return value.Equals(firstValue) ||
+                   value.Equals(secondValue) ||
+                   (allOtherValues != null && Array.IndexOf(allOtherValues, value) >= 0);
+        }
     }
 }

@@ -10,6 +10,6 @@
 
         public LogicPredicate Target { get; }
 
-        public override string ToString() => $"¬{Target}";
+        public override string ToString() => $"¬{Target.ToString("N", null)}";
     }
 }

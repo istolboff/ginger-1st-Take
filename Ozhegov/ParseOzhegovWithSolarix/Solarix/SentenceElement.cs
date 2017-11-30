@@ -14,8 +14,6 @@ namespace ParseOzhegovWithSolarix.Solarix
             LeafLinkType = leafType;
             LemmaVersions = lemmaVersions.AsImmutable();
             Children = new ReadOnlyCollection<SentenceElement>(children.ToList());
-
-            System.Diagnostics.Trace.WriteLine(ToString());
         }
 
         public string Content { get; }
