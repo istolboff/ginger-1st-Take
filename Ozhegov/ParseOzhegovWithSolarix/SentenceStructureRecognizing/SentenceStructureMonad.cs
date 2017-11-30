@@ -26,5 +26,28 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                             : Optional<TResult>.None;
                     });
         }
+
+        public static ISentenceElementMatcher<TResult> Select<TInput, TResult>(
+            this ISentenceElementMatcher<TInput> @this,
+            Func<TInput, TResult> selector)
+        {
+            return new FunctorBasedMatcher<TResult>(
+                    rootSentence =>
+                    {
+                        var match = @this.Match(rootSentence);
+                        return match.HasValue ? new Optional<TResult>(selector(match.Value)) : Optional<TResult>.None;
+                    });
+        }
+
+        public static ISentenceElementMatcher<TResult> Where<TResult>(
+            this ISentenceElementMatcher<TResult> @this, 
+            Func<TResult, bool> filter)
+        {
+            return new FunctorBasedMatcher<TResult>(
+                    rootSentence =>
+                    {
+                        return @this.Match(rootSentence).If(filter);
+                    });
+        }
     }
 }

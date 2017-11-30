@@ -25,7 +25,8 @@ namespace ParseOzhegovWithSolarix
                 {
                     // Сократ стар
                     from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                        from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
+                        from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    where predicate.Detected.Gender == subject.Detected.Gender
                     select new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma)),
 
                     // Сократ (-|это) человек
@@ -55,7 +56,8 @@ namespace ParseOzhegovWithSolarix
                     // Сократ не стар
                     from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                         from unused in predicate.NegationParticle(PartOfSpeech.Частица, "не")
-                        from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = predicate.Detected.Gender })
+                        from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    where subject.Detected.Gender == predicate.Detected.Gender
                     select new NegatedPredicate(new LogicPredicate(predicate.Lemma, new LogicVariable(subject.Lemma))),
 
                     // Сократ не человек
@@ -104,7 +106,8 @@ namespace ParseOzhegovWithSolarix
                         from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
                             from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
                                 from стар in что.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                                    from сократ in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное, Gender = стар.Detected.Gender })
+                                    from сократ in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    where сократ.Detected.Gender == стар.Detected.Gender
                     select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicVariable(сократ.Lemma)))
                 };
 

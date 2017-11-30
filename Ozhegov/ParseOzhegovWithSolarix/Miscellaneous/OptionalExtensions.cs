@@ -8,5 +8,10 @@ namespace ParseOzhegovWithSolarix.Miscellaneous
         {
             return @this.HasValue ? @this : alternative();
         }
+
+        public static IOptional<T> If<T>(this IOptional<T> @this, Func<T, bool> filter)
+        {
+            return @this.HasValue && filter(@this.Value) ? @this : Optional<T>.None;
+        }
     }
 }
