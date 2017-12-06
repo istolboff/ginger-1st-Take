@@ -21,8 +21,50 @@ namespace ParseOzhegovWithSolarix
 
         public object ParseSentence(string sentenceText)
         {
-            var PrebuiltParsers = new ISentenceElementMatcher<LogicPredicate>[]
+            var sentenceStructure = _russianGrammarParser.Parse(sentenceText);
+            foreach (var parsingVariant in sentenceStructure)
+            {
+                var parsingResult = PrebuiltParsers
+                    .Select(parser =>
+                    {
+                        Sentence.MatchingResults.Clear();
+                        var result = parser.Match(parsingVariant);
+                        return AllInputElementsAreMatched(parsingVariant, Sentence.MatchingResults.Values) ? result : Optional<LogicPredicate>.None;
+                    })
+                    .FirstOrDefault(result => result.HasValue) ?? Optional<LogicPredicate>.None;
+
+                if (parsingResult.HasValue)
                 {
+                    return parsingResult.Value;
+                }
+
+                ParsingFailed?.Invoke(sentenceText, parsingVariant);
+            }
+
+            return null;
+        }
+
+        public void Dispose()
+        {
+            _russianGrammarParser.Dispose();
+        }
+
+        public event Action<string, SentenceElement> ParsingFailed;
+
+        private static bool AllInputElementsAreMatched(SentenceElement sentenceElement, ICollection<ElementMatchingResult> elementMatchingResults)
+        {
+            return
+                sentenceElement.LemmaVersions.Any(
+                    inputLemmaVersion => elementMatchingResults.Any(
+                        result => ReferenceEquals(result.LemmaVersion, inputLemmaVersion))) &&
+                sentenceElement.Children.All(
+                    childElement => AllInputElementsAreMatched(childElement, elementMatchingResults));
+        }
+
+        private readonly IRussianGrammarParser _russianGrammarParser;
+
+        private static readonly ISentenceElementMatcher<LogicPredicate>[] PrebuiltParsers = new ISentenceElementMatcher<LogicPredicate>[]
+            {
                     // Сократ стар
                     from predicate in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                         from subject in predicate.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
@@ -162,48 +204,6 @@ namespace ParseOzhegovWithSolarix
                                 from кипит in что.NextCollocationItem<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
                                     from вода in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                     select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicVariable(вода.Lemma)))
-                };
-
-            var sentenceStructure = _russianGrammarParser.Parse(sentenceText);
-            foreach (var parsingVariant in sentenceStructure)
-            {
-                var parsingResult = PrebuiltParsers
-                    .Select(parser =>
-                    {
-                        Sentence.MatchingResults.Clear();
-                        var result = parser.Match(parsingVariant);
-                        return AllInputElementsAreMatched(parsingVariant, Sentence.MatchingResults.Values) ? result : Optional<LogicPredicate>.None;
-                    })
-                    .FirstOrDefault(result => result.HasValue) ?? Optional<LogicPredicate>.None;
-
-                if (parsingResult.HasValue)
-                {
-                    return parsingResult.Value;
-                }
-
-                ParsingFailed?.Invoke(sentenceText, parsingVariant);
-            }
-
-            return null;
-        }
-
-        public void Dispose()
-        {
-            _russianGrammarParser.Dispose();
-        }
-
-        public event Action<string, SentenceElement> ParsingFailed;
-
-        private static bool AllInputElementsAreMatched(SentenceElement sentenceElement, ICollection<ElementMatchingResult> elementMatchingResults)
-        {
-            return
-                sentenceElement.LemmaVersions.Any(
-                    inputLemmaVersion => elementMatchingResults.Any(
-                        result => ReferenceEquals(result.LemmaVersion, inputLemmaVersion))) &&
-                sentenceElement.Children.All(
-                    childElement => AllInputElementsAreMatched(childElement, elementMatchingResults));
-        }
-
-        private readonly IRussianGrammarParser _russianGrammarParser;
+            };
     }
 }

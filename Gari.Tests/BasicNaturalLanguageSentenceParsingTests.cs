@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
 using ParseOzhegovWithSolarix.Solarix;
 using Gari.Tests.Utilities;
+using System.Linq;
 
 namespace Gari.Tests
 {
@@ -12,7 +13,78 @@ namespace Gari.Tests
         [TestMethod]
         public void ElementaryNaturalLanguageSentencesShouldBeCorrectlyParsedToLogicalExpressions()
         {
+            VerifyCorrectParsing(ParsingSamples);
+        }
+
+        [TestMethod]
+        public void CheckingGenderVariateionsInBasicStatements()
+        {
             VerifyCorrectParsing(new Dictionary<string, string>
+            {
+              // P(x) 
+                { "Жанна стара", "СТАРЫЙ(жанна)" },
+                { "Облако старо", "СТАРЫЙ(облако)" },
+                { "Жанна (-|[-] это) человек", "жанна ∈ set<Человек>" },
+                { "Облако (-|[-] это) человек", "облако ∈ set<Человек>" },
+                { "Жанна является человеком", "жанна ∈ set<Человек>" }
+            });
+        }
+
+        [TestMethod]
+        public void SomeSentencesShouldNotBeParsable()
+        {
+            foreach (var sentence in new[] { "Сократ стара", "Маша стар" })
+            {
+                Assert.IsNull(GariParser.ParseSentence(sentence));
+            }
+        }
+
+        [TestMethod]
+        public void RepeatedlyParsingTheSameSentenceShouldReturnTheSameResult()
+        {
+            VerifyCorrectParsing(ParsingSamples.SelectMany(item => new[] { item, item, item }));
+        }
+
+        [ClassInitialize]
+        public static void SetupOnce(TestContext unused)
+        {
+            var solarixRussianGrammarEngine = new SolarixRussianGrammarEngine();
+            solarixRussianGrammarEngine.Initialize();
+            SolarixParserMemoizer = new SolarixParserMemoizer(solarixRussianGrammarEngine);
+            GariParser = new RussianGariParser(SolarixParserMemoizer);
+            GariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
+        }
+
+        [ClassCleanup]
+        public static void TeardownOnce()
+        {
+            SolarixParserMemoizer.Dispose();
+        }
+
+        private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
+        {
+            using (var accumulatingAssert = new AccumulatingAssert())
+            {
+                foreach (var singleSentenceExpectation in expectedParsingResults)
+                {
+                    foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
+                    {
+                        var sentenceParsingResult = GariParser.ParseSentence(inputStringVariation);
+                        Assert.IsNotNull(sentenceParsingResult, $"{inputStringVariation} failed to be parsed.");
+                        accumulatingAssert.AssertEqual(
+                            singleSentenceExpectation.Value,
+                            sentenceParsingResult.ToString(), 
+                            $". Input: {inputStringVariation}");
+                    }
+                }
+            }
+        }
+
+        private static SolarixParserMemoizer SolarixParserMemoizer;
+        private static RussianGariParser GariParser;
+
+        private static readonly IDictionary<string, string> ParsingSamples =
+            new Dictionary<string, string>
             {
               // P(x) 
                 { "Сократ стар", "СТАРЫЙ(сократ)" },
@@ -174,80 +246,6 @@ namespace Gari.Tests
                 { "Существуют розы, которые либо цветут, либо пахнут, либо и то и другое", "(∃ x) x ∈ set<Роза> & (ЦВЕТЕТ(x) | ПАХНЕТ(x))" }, 
               // (∃ x) x ∈ S1 ⇒ (P(x) ⇒ Q(x)) 
                 { "Существуют розы, которые пахнут если цветут", "(∃ x) x ∈ set<Роза> & (ЦВЕТЕТ(x) ⇒ ПАХНЕТ(x))" },
-            });
-        }
-
-        [TestMethod]
-        public void CheckingGenderVariateionsInBasicStatements()
-        {
-            VerifyCorrectParsing(new Dictionary<string, string>
-            {
-              // P(x) 
-                { "Жанна стара", "СТАРЫЙ(жанна)" },
-                { "Облако старо", "СТАРЫЙ(облако)" },
-                { "Жанна (-|[-] это) человек", "жанна ∈ set<Человек>" },
-                { "Облако (-|[-] это) человек", "облако ∈ set<Человек>" },
-                { "Жанна является человеком", "жанна ∈ set<Человек>" }
-            });
-        }
-
-        [TestMethod]
-        public void SomeSentencesShouldNotBeParsable()
-        {
-            foreach (var sentence in new[] { "Сократ стара", "Маша стар" })
-            {
-                Assert.IsNull(_gariParser.ParseSentence(sentence));
-            }
-        }
-
-        [TestMethod]
-        public void RepeatedlyParsingTheSameSentenceShouldReturnTheSameResult()
-        {
-            Assert.AreEqual(_gariParser.ParseSentence("Сократ стар"), _gariParser.ParseSentence("Сократ стар"));
-        }
-
-        [TestInitialize]
-        public void Setup()
-        {
-            _gariParser = new RussianGariParser(SolarixParserMemoizer);
-            _gariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
-        }
-
-        [ClassInitialize]
-        public static void SetupOnce(TestContext unused)
-        {
-            var solarixRussianGrammarEngine = new SolarixRussianGrammarEngine();
-            solarixRussianGrammarEngine.Initialize();
-            SolarixParserMemoizer = new SolarixParserMemoizer(solarixRussianGrammarEngine);
-        }
-
-        [ClassCleanup]
-        public static void TeardownOnce()
-        {
-            SolarixParserMemoizer.Dispose();
-        }
-
-        private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
-        {
-            using (var accumulatingAssert = new AccumulatingAssert())
-            {
-                foreach (var singleSentenceExpectation in expectedParsingResults)
-                {
-                    foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
-                    {
-                        var sentenceParsingResult = _gariParser.ParseSentence(inputStringVariation);
-                        Assert.IsNotNull(sentenceParsingResult, $"{inputStringVariation} failed to be parsed.");
-                        accumulatingAssert.AssertEqual(
-                            singleSentenceExpectation.Value,
-                            sentenceParsingResult.ToString(), 
-                            $". Input: {inputStringVariation}");
-                    }
-                }
-            }
-        }
-
-        private RussianGariParser _gariParser;
-
-        private static SolarixParserMemoizer SolarixParserMemoizer;
+            };
     }
 }

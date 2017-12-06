@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
@@ -19,7 +20,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                             return Optional<TResult>.None;
                         }
 
-                        var intermediateMatcher = selector(firstMatch.Value);
+                        var intermediateMatcher = ExecuteMatcherSelector(selector, firstMatch.Value);
                         var intermediateMatch = intermediateMatcher.Match(rootSentence);
                         return intermediateMatch.HasValue
                             ? new Optional<TResult>(projector(firstMatch.Value, intermediateMatch.Value)) 
@@ -49,5 +50,22 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                         return @this.Match(rootSentence).If(filter);
                     });
         }
+
+        private static ISentenceElementMatcher<TIntermediate> ExecuteMatcherSelector<TInput, TIntermediate>(
+            Func<TInput, ISentenceElementMatcher<TIntermediate>> selector,
+            TInput firstMatchValue)
+        {
+            var selectorInvokationKey = new KeyValuePair<object, object>(selector, firstMatchValue);
+            if (MemoizedSelectors.TryGetValue(selectorInvokationKey, out var selectorResult))
+            {
+                return (ISentenceElementMatcher<TIntermediate>)selectorResult;
+            }
+
+            var result = selector(firstMatchValue);
+            MemoizedSelectors.Add(selectorInvokationKey, result);
+            return result;
+        }
+
+        private static readonly IDictionary<KeyValuePair<object, object>, object> MemoizedSelectors = new Dictionary<KeyValuePair<object, object>, object>();
     }
 }
