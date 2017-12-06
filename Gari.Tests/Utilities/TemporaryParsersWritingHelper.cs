@@ -6,7 +6,7 @@ using System.Text;
 using ParseOzhegovWithSolarix.Miscellaneous;
 using ParseOzhegovWithSolarix.Solarix;
 
-namespace Gari.Tests
+namespace Gari.Tests.Utilities
 {
     public static class TemporaryParsersWritingHelper
     {

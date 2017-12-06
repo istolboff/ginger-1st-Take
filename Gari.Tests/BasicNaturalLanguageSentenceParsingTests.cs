@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
 using ParseOzhegovWithSolarix.Solarix;
+using Gari.Tests.Utilities;
 
 namespace Gari.Tests
 {

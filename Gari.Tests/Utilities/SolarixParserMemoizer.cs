@@ -8,7 +8,7 @@ using ParseOzhegovWithSolarix.Miscellaneous;
 using ParseOzhegovWithSolarix.Solarix;
 using Newtonsoft.Json;
 
-namespace Gari.Tests
+namespace Gari.Tests.Utilities
 {
     public sealed class SolarixParserMemoizer : IRussianGrammarParser
     {

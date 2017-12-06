@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Gari.Tests
+namespace Gari.Tests.Utilities
 {
     internal sealed class AccumulatingAssert : IDisposable
     {

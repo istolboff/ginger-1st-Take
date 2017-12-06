@@ -52,13 +52,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccumulatingAssert.cs" />
     <Compile Include="BasicNaturalLanguageSentenceParsingTests.cs" />
-    <Compile Include="InputStringVariationGenerator.cs" />
     <Compile Include="InputStringVariationGeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SolarixParserMemoizer.cs" />
-    <Compile Include="TemporaryParsersWritingHelper.cs" />
+    <Compile Include="Utilities\AccumulatingAssert.cs" />
+    <Compile Include="Utilities\InputStringVariationGenerator.cs" />
+    <Compile Include="Utilities\SolarixParserMemoizer.cs" />
+    <Compile Include="Utilities\TemporaryParsersWritingHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

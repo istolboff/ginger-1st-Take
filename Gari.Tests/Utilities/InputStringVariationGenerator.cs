@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Gari.Tests
+namespace Gari.Tests.Utilities
 {
     internal static class InputStringVariationGenerator
     {
