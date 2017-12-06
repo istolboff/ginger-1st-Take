@@ -1,12 +1,20 @@
 ﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
+using ParseOzhegovWithSolarix.Solarix;
 
 namespace Gari.Tests
 {
     [TestClass]
     public sealed class BasicNaturalLanguageSentenceParsingTests
     {
+        [TestInitialize]
+        public void Setup()
+        {
+            _gariParser = new RussianGariParser(SolarixParserMemoizer);
+            _gariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
+        }
+
         [TestMethod]
         public void ElementaryNaturalLanguageSentencesShouldBeCorrectlyParsedToLogicalExpressions()
         {
@@ -192,30 +200,41 @@ namespace Gari.Tests
         [TestMethod]
         public void SomeSentencesShouldNotBeParsable()
         {
-            var gariParser = new RussianGariParser();
             foreach (var sentence in new[] { "Сократ стара", "Маша стар" })
             {
-                Assert.IsNull(gariParser.ParseSentence(sentence));
+                Assert.IsNull(_gariParser.ParseSentence(sentence));
             }
         }
 
         [TestMethod]
         public void TemporaryParsersWritingHelperCaller()
         {
-            var gariParser = new RussianGariParser();
-            gariParser.ParseSentence("неверно, что Сократ стар");
+            _gariParser.ParseSentence("Сократ стар");
+        }
+
+        [ClassInitialize]
+        public static void SetupOnce(TestContext unused)
+        {
+            var solarixRussianGrammarEngine = new SolarixRussianGrammarEngine();
+            solarixRussianGrammarEngine.Initialize();
+            SolarixParserMemoizer = new SolarixParserMemoizer(solarixRussianGrammarEngine);
+        }
+
+        [ClassCleanup]
+        public static void TeardownOnce()
+        {
+            SolarixParserMemoizer.Dispose();
         }
 
         private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
         {
-            var gariParser = new RussianGariParser();
             using (var accumulatingAssert = new AccumulatingAssert())
             {
                 foreach (var singleSentenceExpectation in expectedParsingResults)
                 {
                     foreach (var inputStringVariation in InputStringVariationGenerator.GenerateVariations(singleSentenceExpectation.Key))
                     {
-                        var sentenceParsingResult = gariParser.ParseSentence(inputStringVariation);
+                        var sentenceParsingResult = _gariParser.ParseSentence(inputStringVariation);
                         Assert.IsNotNull(sentenceParsingResult, $"{inputStringVariation} failed to be parsed.");
                         accumulatingAssert.AssertEqual(
                             singleSentenceExpectation.Value,
@@ -225,5 +244,9 @@ namespace Gari.Tests
                 }
             }
         }
+
+        private RussianGariParser _gariParser;
+
+        private static SolarixParserMemoizer SolarixParserMemoizer;
     }
 }

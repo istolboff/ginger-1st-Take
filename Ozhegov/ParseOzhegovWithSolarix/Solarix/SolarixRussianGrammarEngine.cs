@@ -9,7 +9,7 @@ using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
-    public sealed class SolarixRussianGrammarEngine : IRussianGrammarParser, IDisposable
+    public sealed class SolarixRussianGrammarEngine : IRussianGrammarParser
     {
         public SolarixRussianGrammarEngine()
         {
@@ -121,9 +121,8 @@ namespace ParseOzhegovWithSolarix.Solarix
                     GrammarEngine.sol_GetLeafLinkType(hNode, leaveIndex)));
 
             return new SentenceElement(
-                position: GrammarEngine.sol_GetNodePosition(hNode), 
                 content: content.ToString(),
-                leafType: leafType == null || leafType.Value < 0 ? (LinkType?)null : (LinkType)leafType.Value,
+                leafLinkType: leafType == null || leafType.Value < 0 ? (LinkType?)null : (LinkType)leafType.Value,
                 lemmaVersions: lemmaVersions, 
                 children: children);
         }

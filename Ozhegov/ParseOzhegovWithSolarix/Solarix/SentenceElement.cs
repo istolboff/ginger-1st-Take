@@ -7,18 +7,15 @@ namespace ParseOzhegovWithSolarix.Solarix
 {
     public sealed class SentenceElement
     {
-        public SentenceElement(string content, int position, IEnumerable<LemmaVersion> lemmaVersions, IEnumerable<SentenceElement> children, LinkType? leafType)
+        public SentenceElement(string content, IEnumerable<LemmaVersion> lemmaVersions, IEnumerable<SentenceElement> children, LinkType? leafLinkType)
         {
             Content = content;
-            Position = position;
-            LeafLinkType = leafType;
+            LeafLinkType = leafLinkType;
             LemmaVersions = lemmaVersions.AsImmutable();
             Children = new ReadOnlyCollection<SentenceElement>(children.ToList());
         }
 
         public string Content { get; }
-
-        public int Position { get; }
 
         public LinkType? LeafLinkType { get; }
 

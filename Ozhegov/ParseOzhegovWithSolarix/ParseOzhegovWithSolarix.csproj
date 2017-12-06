@@ -95,7 +95,6 @@
     <Compile Include="Solarix\VerbAspect.cs" />
     <Compile Include="Solarix\VerbCharacteristics.cs" />
     <Compile Include="Solarix\VerbForm.cs" />
-    <Compile Include="TemporaryParsersWritingHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

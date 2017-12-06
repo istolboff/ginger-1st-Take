@@ -96,7 +96,7 @@ namespace ParseOzhegovWithSolarix
                     .Take(5)
                     .GroupBy(item => item.ParsingResult.Count == 1 
                                     ? item.ParsingResult.Single() 
-                                    : new SentenceElement(string.Empty, 0, new LemmaVersion[0], new SentenceElement[0], null))
+                                    : new SentenceElement(string.Empty, new LemmaVersion[0], new SentenceElement[0], null))
                     .ToDictionary(i => i.Key, i => i.AsImmutable());
 
                 Console.WriteLine(differentThings.ToString());

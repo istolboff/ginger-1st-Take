@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
-    public interface IRussianGrammarParser
+    public interface IRussianGrammarParser : IDisposable 
     {
         IReadOnlyCollection<SentenceElement> Parse(string text);
     }

@@ -2,11 +2,11 @@
 {
     public sealed class LemmaVersion
     {
-        public LemmaVersion(string lemma, PartOfSpeech? partOfSpeech, GrammarCharacteristics grammarCharacteristcs)
+        public LemmaVersion(string lemma, PartOfSpeech? partOfSpeech, GrammarCharacteristics characteristics)
         {
             Lemma = lemma;
             PartOfSpeech = partOfSpeech;
-            Characteristics = grammarCharacteristcs;
+            Characteristics = characteristics;
         }
 
         public string Lemma { get; }

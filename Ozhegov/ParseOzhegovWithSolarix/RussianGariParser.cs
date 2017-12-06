@@ -14,9 +14,9 @@ namespace ParseOzhegovWithSolarix
 {
     public sealed class RussianGariParser : IDisposable
     {
-        public RussianGariParser()
+        public RussianGariParser(IRussianGrammarParser russianGrammarParser)
         {
-            _russianGrammarEngine.Initialize();
+            _russianGrammarParser = russianGrammarParser;
         }
 
         public object ParseSentence(string sentenceText)
@@ -164,7 +164,7 @@ namespace ParseOzhegovWithSolarix
                     select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicVariable(вода.Lemma)))
                 };
 
-            var sentenceStructure = _russianGrammarEngine.Parse(sentenceText);
+            var sentenceStructure = _russianGrammarParser.Parse(sentenceText);
             foreach (var parsingVariant in sentenceStructure)
             {
                 var parsingResult = PrebuiltParsers
@@ -181,7 +181,7 @@ namespace ParseOzhegovWithSolarix
                     return parsingResult.Value;
                 }
 
-                TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton(sentenceText, parsingVariant);
+                ParsingFailed?.Invoke(sentenceText, parsingVariant);
             }
 
             return null;
@@ -189,8 +189,10 @@ namespace ParseOzhegovWithSolarix
 
         public void Dispose()
         {
-            _russianGrammarEngine.Dispose();
+            _russianGrammarParser.Dispose();
         }
+
+        public event Action<string, SentenceElement> ParsingFailed;
 
         private static bool AllInputElementsAreMatched(SentenceElement sentenceElement, ICollection<ElementMatchingResult> elementMatchingResults)
         {
@@ -202,6 +204,6 @@ namespace ParseOzhegovWithSolarix
                     childElement => AllInputElementsAreMatched(childElement, elementMatchingResults));
         }
 
-        private readonly SolarixRussianGrammarEngine _russianGrammarEngine = new SolarixRussianGrammarEngine();
+        private readonly IRussianGrammarParser _russianGrammarParser;
     }
 }

@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using ParseOzhegovWithSolarix.Solarix;
-using ParseOzhegovWithSolarix.Miscellaneous;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using ParseOzhegovWithSolarix.Miscellaneous;
+using ParseOzhegovWithSolarix.Solarix;
 
-namespace ParseOzhegovWithSolarix
+namespace Gari.Tests
 {
     public static class TemporaryParsersWritingHelper
     {
@@ -74,7 +74,7 @@ namespace ParseOzhegovWithSolarix
             return result.ToString();
         }
 
-        private readonly static IDictionary<string, string> PunctuationMatcherNames = new Dictionary<string, string>
+        private static readonly IDictionary<string, string> PunctuationMatcherNames = new Dictionary<string, string>
         { 
             { "-", "dash" },
             { ",", "comma" },
