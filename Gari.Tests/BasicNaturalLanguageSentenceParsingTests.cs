@@ -9,13 +9,6 @@ namespace Gari.Tests
     [TestClass]
     public sealed class BasicNaturalLanguageSentenceParsingTests
     {
-        [TestInitialize]
-        public void Setup()
-        {
-            _gariParser = new RussianGariParser(SolarixParserMemoizer);
-            _gariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
-        }
-
         [TestMethod]
         public void ElementaryNaturalLanguageSentencesShouldBeCorrectlyParsedToLogicalExpressions()
         {
@@ -208,9 +201,16 @@ namespace Gari.Tests
         }
 
         [TestMethod]
-        public void TemporaryParsersWritingHelperCaller()
+        public void RepeatedlyParsingTheSameSentenceShouldReturnTheSameResult()
         {
-            _gariParser.ParseSentence("Сократ стар");
+            Assert.AreEqual(_gariParser.ParseSentence("Сократ стар"), _gariParser.ParseSentence("Сократ стар"));
+        }
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _gariParser = new RussianGariParser(SolarixParserMemoizer);
+            _gariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
         }
 
         [ClassInitialize]
