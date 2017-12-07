@@ -44,7 +44,8 @@ namespace Gari.Tests.Utilities
                     { LinkType.RHEMA_link, "Rhema" },
                     { LinkType.NEXT_COLLOCATION_ITEM_link, "NextCollocationItem" },
                     { LinkType.NEGATION_PARTICLE_link, "NegationParticle" },
-                    { LinkType.NEXT_CLAUSE_link, "NextClause" }
+                    { LinkType.NEXT_CLAUSE_link, "NextClause" },
+                    { LinkType.RIGHT_GENITIVE_OBJECT_link, "RightGenitiveObject" }
                 }[sentenceElement.LeafLinkType.Value]);
 
             var firstLemma = sentenceElement.LemmaVersions.First();

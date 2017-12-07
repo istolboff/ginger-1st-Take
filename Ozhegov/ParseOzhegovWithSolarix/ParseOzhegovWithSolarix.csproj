@@ -54,6 +54,7 @@
     <Compile Include="Miscellaneous\TypeExtensions.cs" />
     <Compile Include="Miscellaneous\Verify.cs" />
     <Compile Include="PredicateLogic\LogicConstant.cs" />
+    <Compile Include="PredicateLogic\LogicFunction.cs" />
     <Compile Include="PredicateLogic\LogicPredicate.cs" />
     <Compile Include="PredicateLogic\LogicTerm.cs" />
     <Compile Include="PredicateLogic\LogicVariable.cs" />

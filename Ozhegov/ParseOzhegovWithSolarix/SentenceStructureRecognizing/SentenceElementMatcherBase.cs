@@ -24,15 +24,21 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.OBJECT_link, expectedProperties);
         }
 
-        public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
+        public SentenceElementMatcher<TChildGrammarCharacteristics> RightGenitiveObject<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
         {
-            return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.RIGHT_GENITIVE_OBJECT_link, expectedProperties);
         }
 
         public SentenceElementMatcher<TChildGrammarCharacteristics> NextCollocationItem<TChildGrammarCharacteristics>(object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.NEXT_COLLOCATION_ITEM_link, expectedProperties);
+        }
+
+        public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
         }
 
         public PartOfSpeechMatcher NextClause(PartOfSpeech partOfSpeech, string content)

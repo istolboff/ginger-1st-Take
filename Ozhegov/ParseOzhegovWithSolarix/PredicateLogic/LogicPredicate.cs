@@ -6,27 +6,27 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 {
     public class LogicPredicate : IFormattable, IEquatable<LogicPredicate>
     {
-        public LogicPredicate(string predicateName, params LogicTerm[] logicTerms)
+        public LogicPredicate(string predicateName, params LogicTerm[] terms)
         {
             Name = predicateName;
-            LogicTerms = new ReadOnlyCollection<LogicTerm>(logicTerms);
+            Terms = new ReadOnlyCollection<LogicTerm>(terms);
         }
 
         public string Name { get; }
 
-        public ReadOnlyCollection<LogicTerm> LogicTerms { get; }
+        public ReadOnlyCollection<LogicTerm> Terms { get; }
 
         public bool Equals(LogicPredicate other) =>
             other != null &&
             other.GetType() == typeof(LogicPredicate) &&
             other.Name == Name &&
-            other.LogicTerms.SequenceEqual(LogicTerms);
+            other.Terms.SequenceEqual(Terms);
 
         public override bool Equals(object obj) => Equals(obj as LogicPredicate);
 
-        public override int GetHashCode() => (Name.GetHashCode() * 397) ^ LogicTerms.Count.GetHashCode();
+        public override int GetHashCode() => (Name.GetHashCode() * 397) ^ Terms.Count.GetHashCode();
 
-        public override string ToString() => $"{Name.ToUpper()}({string.Join(", ", LogicTerms)})";
+        public override string ToString() => $"{Name.ToUpper()}({string.Join(", ", Terms)})";
 
         public virtual string ToString(string format, IFormatProvider formatProvider) => ToString();
     }

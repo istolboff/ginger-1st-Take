@@ -4,9 +4,9 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 {
     public sealed class LogicVariable : LogicTerm, IEquatable<LogicVariable>
     {
-        public LogicVariable(string variableName)
+        public LogicVariable(string name)
         {
-            Name = variableName;
+            Name = name;
         }
 
         public string Name { get; }
