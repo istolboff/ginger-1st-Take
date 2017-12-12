@@ -24,6 +24,12 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.OBJECT_link, expectedProperties);
         }
 
+        public SentenceElementMatcher<TChildGrammarCharacteristics> Rhema<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.RHEMA_link, expectedProperties);
+        }
+
         public SentenceElementMatcher<TChildGrammarCharacteristics> RightGenitiveObject<TChildGrammarCharacteristics>(object expectedProperties)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
@@ -34,6 +40,17 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.NEXT_COLLOCATION_ITEM_link, expectedProperties);
+        }
+
+        public SentenceElementMatcher<TChildGrammarCharacteristics> Attribute<TChildGrammarCharacteristics>(object expectedProperties, bool uglyHack_DoNotIncrementNextChildIndex = false)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.ATTRIBUTE_link, expectedProperties, uglyHack_DoNotIncrementNextChildIndex);
+        }
+
+        public PartOfSpeechMatcher Object(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.OBJECT_link, partOfSpeech, content);
         }
 
         public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
@@ -51,12 +68,14 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher(LinkType.NEGATION_PARTICLE_link, partOfSpeech, content);
         }
 
-        // public NextClause()
-
-        public SentenceElementMatcher<TChildGrammarCharacteristics> Rhema<TChildGrammarCharacteristics>(object expectedProperties)
-            where TChildGrammarCharacteristics : GrammarCharacteristics
+        public PartOfSpeechMatcher Attribute(PartOfSpeech partOfSpeech, string content)
         {
-            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.RHEMA_link, expectedProperties);
+            return AddChildElementMatcher(LinkType.ATTRIBUTE_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher PrefixParticle(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.PREFIX_PARTICLE_link, partOfSpeech, content);
         }
 
         public IOptional<TResult> Match(SentenceElement rootSentenceElement)
@@ -92,10 +111,16 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 
         private SentenceElementMatcher<TChildGrammarCharacteristics> AddChildElementMatcher<TChildGrammarCharacteristics>(
             LinkType expectedLinkType,
-            object expectedProperties)
+            object expectedProperties,
+            bool uglyHack_DoNotIncrementNextChildIndex = false)
             where TChildGrammarCharacteristics : GrammarCharacteristics
         {
-            var currentChildIndex = _nextChildIndex++;
+            var currentChildIndex = _nextChildIndex;
+            if (!uglyHack_DoNotIncrementNextChildIndex)
+            {
+                ++_nextChildIndex;
+            }
+
             return new SentenceElementMatcher<TChildGrammarCharacteristics>(
                 rootElement =>
                     _getElementToMatch(rootElement)

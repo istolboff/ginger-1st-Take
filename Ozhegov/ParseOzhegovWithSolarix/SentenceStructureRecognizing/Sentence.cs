@@ -6,7 +6,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 {
     internal static class Sentence
     {
-        public static IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResults => MatchingResultsStorage.Value;
+        public static IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResults => MatchingResultsStorage;
 
         public static ISentenceElementMatcher<SentenceElementMatcher<TGrammarCharacteristics>> Root<TGrammarCharacteristics>(object expectedProperties)
             where TGrammarCharacteristics : GrammarCharacteristics
@@ -19,8 +19,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return new PartOfSpeechMatcher(_ => _, partOfSpeech, content);
         }
 
-        private static readonly ThreadLocal<Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>> MatchingResultsStorage =
-            new ThreadLocal<Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>>(
-                   () => new Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>());
+        private static readonly IDictionary<ISentenceElementMatcher<object>, ElementMatchingResult> MatchingResultsStorage =
+            new Dictionary<ISentenceElementMatcher<object>, ElementMatchingResult>();
     }
 }

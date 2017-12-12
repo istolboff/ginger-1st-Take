@@ -2,7 +2,7 @@
 {
     public sealed class AdjectiveCharacteristics : GrammarCharacteristics
     {
-        public AdjectiveCharacteristics(Case @case, Number number, Gender gender, AdjectiveForm adjectiveForm, ComparisonForm comparisonForm)
+        public AdjectiveCharacteristics(Case? @case, Number? number, Gender? gender, AdjectiveForm adjectiveForm, ComparisonForm comparisonForm)
         {
             Case = @case;
             Number = number;
@@ -11,11 +11,11 @@
             ComparisonForm = comparisonForm;
         }
 
-        public Case Case { get; }
+        public Case? Case { get; }
 
-        public Number Number { get; }
+        public Number? Number { get; }
 
-        public Gender Gender { get; }
+        public Gender? Gender { get; }
 
         public AdjectiveForm AdjectiveForm { get; }
 

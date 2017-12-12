@@ -16,14 +16,16 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             _expectedContent = expectedContent;
         }
 
+        public object Detected { get; internal set; }
+
         protected override LemmaVersion MatchCore(SentenceElement elementToMatch)
         {
-            return _expectedContent != elementToMatch.Content 
+            return !_expectedContent.Equals(elementToMatch.Content, StringComparison.InvariantCultureIgnoreCase)
                 ? null
                 : elementToMatch.LemmaVersions.FirstOrDefault(lemmaVersion => lemmaVersion.PartOfSpeech == _expectedPartOfSpeech);
         }
 
-        protected override PartOfSpeechMatcher This => this; 
+        protected override PartOfSpeechMatcher This => this;
 
         private readonly PartOfSpeech _expectedPartOfSpeech;
         private readonly string _expectedContent;

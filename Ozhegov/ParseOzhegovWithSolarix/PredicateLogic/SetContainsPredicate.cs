@@ -18,6 +18,14 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
             other.SetName == SetName &&
             other.SetElement == SetElement;
 
+        public override bool Equals(LogicPredicate other) => Equals(other as SetContainsPredicate);
+
+        public override bool Equals(LogicFormula other) => Equals(other as SetContainsPredicate);
+
+        public override bool Equals(object obj) => Equals(obj as SetContainsPredicate);
+
+        public override int GetHashCode() => base.GetHashCode();
+
         public override string ToString() => $"{SetElement} ∈ set<{SetName}>";
 
         public override string ToString(string format, IFormatProvider formatProvider) => 

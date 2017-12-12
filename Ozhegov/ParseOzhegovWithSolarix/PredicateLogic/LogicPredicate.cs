@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
-    public class LogicPredicate : IFormattable, IEquatable<LogicPredicate>
+    public class LogicPredicate : LogicFormula, IFormattable, IEquatable<LogicPredicate>
     {
         public LogicPredicate(string predicateName, params LogicTerm[] terms)
         {
@@ -16,11 +16,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public ReadOnlyCollection<LogicTerm> Terms { get; }
 
-        public bool Equals(LogicPredicate other) =>
+        public virtual bool Equals(LogicPredicate other) =>
             other != null &&
             other.GetType() == typeof(LogicPredicate) &&
             other.Name == Name &&
             other.Terms.SequenceEqual(Terms);
+
+        public override bool Equals(LogicFormula other) => Equals(other as LogicPredicate);
 
         public override bool Equals(object obj) => Equals(obj as LogicPredicate);
 

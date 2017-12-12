@@ -15,7 +15,8 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             object expectedProperties)
             : base(getElementToMatch)
         {
-            _expectedContent = GetExpectedContent(expectedProperties);
+            _expectedContent = GetExpectedValueByName(expectedProperties, nameof(Content));
+            _expectedLemma = GetExpectedValueByName(expectedProperties, nameof(Lemma));
             _matchGrammarCharacteristics = BuildGrammarCharacteristicsMatcher(expectedProperties);
         }
 
@@ -26,24 +27,31 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         public TGrammarCharacteristics Detected => (TGrammarCharacteristics)Sentence.MatchingResults[this].LemmaVersion.Characteristics;
 
         protected override LemmaVersion MatchCore(SentenceElement elementToMatch) => 
-            _expectedContent != null && _expectedContent != elementToMatch.Content
+            _expectedContent != null && !_expectedContent.Equals(elementToMatch.Content, StringComparison.OrdinalIgnoreCase)
                 ? null
                 : elementToMatch.LemmaVersions
                     .Where(lemmaVersion => lemmaVersion.Characteristics is TGrammarCharacteristics)
-                    .FirstOrDefault(lemmaVersion => _matchGrammarCharacteristics((TGrammarCharacteristics)lemmaVersion.Characteristics));
+                    .FirstOrDefault(lemmaVersion => 
+                        _matchGrammarCharacteristics((TGrammarCharacteristics)lemmaVersion.Characteristics) && 
+                        (_expectedLemma == null || _expectedLemma.Equals(lemmaVersion.Lemma, StringComparison.OrdinalIgnoreCase)));
 
         protected override SentenceElementMatcher<TGrammarCharacteristics> This => this; 
 
-        private static string GetExpectedContent(object expectedProperties) => 
-            expectedProperties.GetType().GetProperty(ContentPropertyName, BindingFlags.Public | BindingFlags.Instance)?.GetValue(expectedProperties) as string;
+        private static string GetExpectedValueByName(object expectedProperties, string valueName) => 
+            expectedProperties.GetType().GetProperty(valueName, BindingFlags.Public | BindingFlags.Instance)?.GetValue(expectedProperties) as string;
 
         private static Predicate<TGrammarCharacteristics> BuildGrammarCharacteristicsMatcher(object expectedProperties)
         {
             var expectedPropertiesInfo = expectedProperties
                 .GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(property => property.Name != ContentPropertyName)
+                .Where(property => !property.Name.IsOneOf(nameof(Content), nameof(Lemma)))
                 .ToArray();
+
+            if (!expectedPropertiesInfo.Any())
+            {
+                return grammarCharacteristics => true;
+            }
 
             var appropriatePropertiesInfo = typeof(TGrammarCharacteristics).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -98,8 +106,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         }
 
         private readonly string _expectedContent;
+        private readonly string _expectedLemma;
         private readonly Predicate<TGrammarCharacteristics> _matchGrammarCharacteristics;
-
-        private const string ContentPropertyName = "Content";
     }
 }

@@ -7,11 +7,22 @@ using System.Reflection;
 using ParseOzhegovWithSolarix.Miscellaneous;
 using ParseOzhegovWithSolarix.Solarix;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Gari.Tests.Utilities
 {
     public sealed class SolarixParserMemoizer : IRussianGrammarParser
     {
+        static SolarixParserMemoizer()
+        {
+            JsonConvert.DefaultSettings = () => 
+            {
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
+                return settings;
+            };
+        }
+
         public SolarixParserMemoizer(IRussianGrammarParser wrappedParser)
         {
             _wrappedParser = wrappedParser;

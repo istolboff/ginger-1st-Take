@@ -45,7 +45,13 @@ namespace Gari.Tests.Utilities
                     { LinkType.NEXT_COLLOCATION_ITEM_link, "NextCollocationItem" },
                     { LinkType.NEGATION_PARTICLE_link, "NegationParticle" },
                     { LinkType.NEXT_CLAUSE_link, "NextClause" },
-                    { LinkType.RIGHT_GENITIVE_OBJECT_link, "RightGenitiveObject" }
+                    { LinkType.RIGHT_GENITIVE_OBJECT_link, "RightGenitiveObject" },
+                    { LinkType.ATTRIBUTE_link,  "Attribute" },
+                    { LinkType.RIGHT_NAME_link, "RightName" },
+                    { LinkType.SEPARATE_ATTR_link, "SeparateAttribute" },
+                    { LinkType.PREFIX_PARTICLE_link, "PrefixParticle" },
+                    { LinkType.RIGHT_LOGIC_ITEM_link, "RightLogicItem" }
+
                 }[sentenceElement.LeafLinkType.Value]);
 
             var firstLemma = sentenceElement.LemmaVersions.First();

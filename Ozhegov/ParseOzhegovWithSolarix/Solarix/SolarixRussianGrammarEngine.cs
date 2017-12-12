@@ -154,15 +154,13 @@ namespace ParseOzhegovWithSolarix.Solarix
 
         private static TState GetNodeVersionCoordinateState<TState>(IntPtr hNode, int versionIndex) where TState: struct 
         {
-            var coordinateId = CoordinateStateTypeToCoordinateIdMap[typeof(TState)];
-            var coordinateState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, coordinateId);
-
-            if (coordinateState < 0)
+            var result = TryGetNodeVersionCoordinateState<TState>(hNode, versionIndex);
+            if (result == null)
             {
                 throw new InvalidOperationException($"Could not get {typeof(TState).Name} coordinate");
             }
 
-            return (TState)(object)coordinateState;
+            return result.Value;
         }
 
         private static TState? TryGetNodeVersionCoordinateState<TState>(IntPtr hNode, int versionIndex) where TState : struct
@@ -170,6 +168,20 @@ namespace ParseOzhegovWithSolarix.Solarix
             var coordinateId = CoordinateStateTypeToCoordinateIdMap[typeof(TState)];
             var coordinateState = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, coordinateId);
             return (coordinateState < 0) ? (TState?)null : (TState)(object)coordinateState;
+        }
+
+        private static TState GetBoolCoordinateState<TState>(IntPtr hNode, int versionIndex, int coordinateId, TState trueValue, TState falseValue)
+        {
+            var valueCode = GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, coordinateId);
+            switch (valueCode)
+            {
+                case 0:
+                    return falseValue;
+                case 1:
+                    return trueValue;
+                default:
+                    throw new InvalidOperationException($"GetBoolCoordinateState<{typeof(TState).Name}>({coordinateId}) returned {valueCode} instead of 0 or 1.");
+            }
         }
 
         private IntPtr _engineHandle;
@@ -201,10 +213,10 @@ namespace ParseOzhegovWithSolarix.Solarix
                     PartOfSpeech.Прилагательное,
                     (hNode, versionIndex) => 
                         new AdjectiveCharacteristics(
-                            GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
-                            GrammarEngine.sol_GetNodeVerCoordState(hNode, versionIndex, GrammarEngineAPI.SHORTNESS_ru) >= 0 ? AdjectiveForm.Краткое : AdjectiveForm.Полное,
+                            TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                            TryGetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                            TryGetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                            GetBoolCoordinateState(hNode, versionIndex, GrammarEngineAPI.SHORTNESS_ru, AdjectiveForm.Краткое, AdjectiveForm.Полное),
                             GetNodeVersionCoordinateState<ComparisonForm>(hNode, versionIndex))
                 },
                 {
