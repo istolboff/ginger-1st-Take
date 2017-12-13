@@ -29,7 +29,8 @@ namespace Gari.Tests
                 { "Жанна является человеком", "жанна ∈ set<Человек>" },
                 { "Каждая зверушка смертна", "(∀ x) x ∈ set<Зверушка> ⇒ СМЕРТНЫЙ(x)" },
                 { "Каждое облако конечно", "(∀ x) x ∈ set<Облако> ⇒ КОНЕЧНЫЙ(x)" },
-                { "Существует живая рыба", "(∃ x) x ∈ set<Рыба> & ЖИВОЙ(x)" }
+                { "Существует живая рыба", "(∃ x) x ∈ set<Рыба> & ЖИВОЙ(x)" },
+                { "Если пациентка жива, то она дышит", "ЖИВОЙ(пациентка) ⇒ ДЫШАТЬ(пациентка)" }
             });
         }
 
@@ -55,6 +56,22 @@ namespace Gari.Tests
         public void RepeatedlyParsingTheSameSentenceShouldReturnTheSameResult()
         {
             VerifyCorrectParsing(ParsingSamples.SelectMany(item => new[] { item, item, item }));
+        }
+
+        [TestMethod]
+        [TestCategory("Helpers")]
+        public void DebugSingleParserOnSingleSentence()
+        {
+            RussianGariParser.PrebuiltParsers["Если пациент жив, то он дышит"].Match(SolarixParserMemoizer.Parse("Если пациент жив, то он дышит").Single());
+        }
+
+        [TestMethod]
+        [TestCategory("Helpers")]
+        public void PrepareParsingExpressionSkeletonsForAllParsingSamples()
+        {
+            TemporaryParsersWritingHelper.DumpParsingExpressionSkeletons(
+                ParsingSamples.Keys.SelectMany(InputStringVariationGenerator.GenerateVariations), 
+                SolarixParserMemoizer);
         }
 
         [ClassInitialize]
@@ -135,12 +152,12 @@ namespace Gari.Tests
               // P(x) & Q(x) 
                 { "Сократ стар и умен", "СТАРЫЙ(сократ) & УМНЫЙ(сократ)" },
                 { "Роза цветет и пахнет", "ЦВЕСТИ(роза) & ПАХНУТЬ(роза)" },
-                { "Нетте [-] [это] человек и пароход", "нетте ∈ set<Человек> & нетте ∈ set<Пароход>" }, 
+                { "Петя (-|[-] это) человек и пароход", "петя ∈ set<Человек> & петя ∈ set<Пароход>" }, 
               // P(x) | Q(x) 
-                { "Пациент жив или мертв", "ЖИВ(пациент) | МЕРТВ(пациент)" }, 
+                { "Пациент жив или мертв", "ЖИВОЙ(пациент) | МЕРТВЫЙ(пациент)" }, 
               // P(x) ⇒ Q(x) 
-                { "Если пациент жив, то он дышит", "ЖИВ(пациент) ⇒ ДЫШИТ(пациент)" },
-                { "Из того, что 10 натуральное, следует, что 10 положительное", "НАТУРАЛЬНОЕ(10) ⇒ ПОЛОЖИТЕЛЬНОЕ(10)" }, 
+                { "Если пациент жив, то он дышит", "ЖИВОЙ(пациент) ⇒ ДЫШАТЬ(пациент)" },
+                { "Из того, что число натуральное, следует, что оно положительное", "НАТУРАЛЬНЫЙ(число) ⇒ ПОЛОЖИТЕЛЬНЫЙ(число)" }, 
               // ¬P(f(x)) 
                 { "Отец Сократа не стар", "¬СТАР(Отец(сократ))" },
                 { "Отец Сократа [-] [это] не человек", "¬(Отец(сократ) ∈ set<Человек>)" },

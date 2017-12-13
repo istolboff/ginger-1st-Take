@@ -2,7 +2,7 @@
 {
     public sealed class VerbCharacteristics : GrammarCharacteristics
     {
-        public VerbCharacteristics(Case? @case, Number number, VerbForm verbForm, Person person, VerbAspect verbAspect, Tense tense)
+        public VerbCharacteristics(Case? @case, Number number, VerbForm verbForm, Person? person, VerbAspect verbAspect, Tense tense)
         {
             Case = @case;
             Number = number;
@@ -18,7 +18,7 @@
 
         public VerbForm VerbForm { get; }
 
-        public Person Person { get; }
+        public Person? Person { get; }
 
         public VerbAspect VerbAspect { get; }
 

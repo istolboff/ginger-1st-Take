@@ -48,9 +48,32 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.ATTRIBUTE_link, expectedProperties, uglyHack_DoNotIncrementNextChildIndex);
         }
 
+        public SentenceElementMatcher<TChildGrammarCharacteristics> Details<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.DETAILS_link, expectedProperties);
+        }
+
+        public SentenceElementMatcher<TChildGrammarCharacteristics> SubordinateClause<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.SUBORDINATE_CLAUSE_link, expectedProperties);
+        }
+
+        public SentenceElementMatcher<TChildGrammarCharacteristics> SeparateAttribute<TChildGrammarCharacteristics>(object expectedProperties)
+            where TChildGrammarCharacteristics : GrammarCharacteristics
+        {
+            return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.SEPARATE_ATTR_link, expectedProperties);
+        }
+
         public PartOfSpeechMatcher Object(PartOfSpeech partOfSpeech, string content)
         {
             return AddChildElementMatcher(LinkType.OBJECT_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher Subject(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.SUBJECT_link, partOfSpeech, content);
         }
 
         public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
@@ -76,6 +99,26 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         public PartOfSpeechMatcher PrefixParticle(PartOfSpeech partOfSpeech, string content)
         {
             return AddChildElementMatcher(LinkType.PREFIX_PARTICLE_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher RightLogicItem(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.RIGHT_LOGIC_ITEM_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher Punctuation(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.PUNCTUATION_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher PrefixConjunction(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.PREFIX_CONJUNCTION_link, partOfSpeech, content);
+        }
+
+        public PartOfSpeechMatcher PreposAdjunct(PartOfSpeech partOfSpeech, string content)
+        {
+            return AddChildElementMatcher(LinkType.PREPOS_ADJUNCT_link, partOfSpeech, content);
         }
 
         public IOptional<TResult> Match(SentenceElement rootSentenceElement)

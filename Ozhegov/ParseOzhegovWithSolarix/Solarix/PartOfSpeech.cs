@@ -17,6 +17,7 @@ namespace ParseOzhegovWithSolarix.Solarix
         Частица = GrammarEngineAPI.PARTICLE_ru,
         Местоим_Сущ = GrammarEngineAPI.PRONOUN2_ru,
         Притяж_Частица = GrammarEngineAPI.POSESS_PARTICLE,
-        Num_Word = GrammarEngineAPI.NUM_WORD_CLASS
+        Num_Word = GrammarEngineAPI.NUM_WORD_CLASS,
+        Impersonal_Verb = GrammarEngineAPI.IMPERSONAL_VERB_ru
     }
 }

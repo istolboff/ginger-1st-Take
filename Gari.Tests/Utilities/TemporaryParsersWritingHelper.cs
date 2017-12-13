@@ -12,24 +12,41 @@ namespace Gari.Tests.Utilities
     {
         public static void DumpParsingExpressionSkeleton(string sentenceText, SentenceElement sentenceElement)
         {
-            Trace.WriteLine($"// {sentenceText}");
-            DumpParsingExpressionSkeletonCore(sentenceElement, "Sentence");
-            Trace.WriteLine("select new ?LogicalPredicate?(??????)");
+            Trace.WriteLine("{");
+            Trace.WriteLine($"\t\"{sentenceText}\",");
+            DumpParsingExpressionSkeletonCore(sentenceElement, "Sentence", new HashSet<string>(), "\t");
+            Trace.WriteLine("\tselect new ??????");
+            Trace.WriteLine("}");
         }
 
-        private static void DumpParsingExpressionSkeletonCore(SentenceElement sentenceElement, string parentMatcherName)
+        public static void DumpParsingExpressionSkeletons(IEnumerable<string> sentences, IRussianGrammarParser russianGrammarParser)
         {
-            var matcherName = GetMatcherName(sentenceElement.Content);
-            Trace.WriteLine($"from {matcherName} in {parentMatcherName}.{CreateSelectingMethod(sentenceElement)}");
-            foreach (var child in sentenceElement.Children)
+            foreach (var sentence in sentences)
             {
-                DumpParsingExpressionSkeletonCore(child, matcherName);
+                DumpParsingExpressionSkeleton(sentence, russianGrammarParser.Parse(sentence).First());
+                Trace.WriteLine(string.Empty);
             }
         }
 
-        private static string GetMatcherName(string content)
+        private static void DumpParsingExpressionSkeletonCore(
+            SentenceElement sentenceElement, 
+            string parentMatcherName,
+            ICollection<string> usedVariableNames,
+            string linePrefix)
         {
-            return (PunctuationMatcherNames.TryGetValue(content, out var specialName) ? specialName : content).ToLower();
+            var matcherName = GetMatcherName(sentenceElement.Content, usedVariableNames);
+            Trace.WriteLine($"{linePrefix}from {matcherName} in {parentMatcherName}.{CreateSelectingMethod(sentenceElement)}");
+            usedVariableNames.Add(matcherName);
+            foreach (var child in sentenceElement.Children)
+            {
+                DumpParsingExpressionSkeletonCore(child, matcherName, usedVariableNames, linePrefix + "\t");
+            }
+        }
+
+        private static string GetMatcherName(string content, ICollection<string> usedVariableNames)
+        {
+            var result = (PunctuationMatcherNames.TryGetValue(content, out var specialName) ? specialName : content).ToLower();
+            return Enumerable.Range(0, 100).Select(i => result + ((int?)i).If(v => v > 0)).First(name => !usedVariableNames.Contains(name));
         }
 
         private static string CreateSelectingMethod(SentenceElement sentenceElement)
@@ -50,8 +67,14 @@ namespace Gari.Tests.Utilities
                     { LinkType.RIGHT_NAME_link, "RightName" },
                     { LinkType.SEPARATE_ATTR_link, "SeparateAttribute" },
                     { LinkType.PREFIX_PARTICLE_link, "PrefixParticle" },
-                    { LinkType.RIGHT_LOGIC_ITEM_link, "RightLogicItem" }
-
+                    { LinkType.RIGHT_LOGIC_ITEM_link, "RightLogicItem" },
+                    { LinkType.DETAILS_link, "Details" },
+                    { LinkType.PUNCTUATION_link, "Punctuation" },
+                    { LinkType.PREFIX_CONJUNCTION_link, "PrefixConjunction" },
+                    { LinkType.SUBORDINATE_CLAUSE_link, "SubordinateClause" },
+                    { LinkType.PREPOS_ADJUNCT_link, "PreposAdjunct" },
+                    { LinkType.NEXT_ADJECTIVE_link, "NextAdjective" },
+                    { LinkType.BEG_INTRO_link, "BegIntro" }
                 }[sentenceElement.LeafLinkType.Value]);
 
             var firstLemma = sentenceElement.LemmaVersions.First();

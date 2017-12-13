@@ -36,7 +36,8 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
             new Dictionary<LogicConnectiveType, char>
             {
                 { LogicConnectiveType.Follows, '⇒' },
-                { LogicConnectiveType.And, '&' }
+                { LogicConnectiveType.And, '&' },
+                { LogicConnectiveType.Or, '|' }
             };
     }
 }

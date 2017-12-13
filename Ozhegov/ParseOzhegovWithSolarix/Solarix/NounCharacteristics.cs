@@ -2,7 +2,7 @@
 {
     public sealed class NounCharacteristics : GrammarCharacteristics
     {
-        public NounCharacteristics(Case @case, Number number, Gender gender, Form form)
+        public NounCharacteristics(Case @case, Number number, Gender gender, Form? form)
         {
             Case = @case;
             Number = number;
@@ -16,7 +16,7 @@
 
         public Gender Gender { get; }
 
-        public Form Form { get; }
+        public Form? Form { get; }
 
         public override string ToString()
         {

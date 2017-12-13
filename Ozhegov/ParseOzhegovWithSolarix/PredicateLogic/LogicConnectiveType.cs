@@ -3,6 +3,7 @@
     public enum LogicConnectiveType
     {
         Follows,
-        And
+        And,
+        Or
     }
 }

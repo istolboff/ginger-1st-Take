@@ -196,7 +196,7 @@ namespace ParseOzhegovWithSolarix.Solarix
                             GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Form>(hNode, versionIndex))
+                            TryGetNodeVersionCoordinateState<Form>(hNode, versionIndex))
                 },
                 {
                     PartOfSpeech.Глагол,
@@ -205,7 +205,7 @@ namespace ParseOzhegovWithSolarix.Solarix
                             TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<VerbForm>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Person>(hNode, versionIndex),
+                            TryGetNodeVersionCoordinateState<Person>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<Tense>(hNode, versionIndex))
                 },
@@ -230,6 +230,14 @@ namespace ParseOzhegovWithSolarix.Solarix
                         new GerundCharacteristics(
                             GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
                             GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex))
+                },
+                {
+                    PartOfSpeech.Местоимение,
+                    (hNode, versionIndex) =>
+                        new PronounCharacteristics(
+                            GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                            GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                            GetNodeVersionCoordinateState<Person>(hNode, versionIndex))
                 }
             };
 

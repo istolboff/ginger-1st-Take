@@ -15,5 +15,10 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
         {
             return new LogicConnective(LogicConnectiveType.And, left, right);
         }
+
+        public static LogicFormula operator |(LogicFormula left, LogicFormula right)
+        {
+            return new LogicConnective(LogicConnectiveType.Or, left, right);
+        }
     }
 }
