@@ -74,6 +74,11 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         {
             var issues = new List<string>();
 
+            if (expectedPropertiesInfo.Any(property => property.PropertyType.RemoveNullabilityIfAny().IsOneOf(typeof(Form), typeof(Gender))))
+            {
+                issues.Add($"A property of type 'Одушевленность' or 'Пол' is used when matching a grammar characteristics. Are you sure you're doing the right thing?");
+            }
+
             var propertiesWithUnexpectedNames = expectedPropertiesInfo
                 .Where(property => appropriatePropertiesInfo.All(ap => ap.Name != property.Name))
                 .Select(property => property.Name)

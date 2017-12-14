@@ -95,7 +95,7 @@ namespace Gari.Tests.Utilities
                         ", ",
                         from property in characteristicsType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                         let propertyValue = property.GetValue(firstLemma.Characteristics)
-                        where propertyValue != null
+                        where property.PropertyType.RemoveNullabilityIfAny() != typeof(Form) && propertyValue != null
                         select $"{property.Name} = {property.PropertyType.RemoveNullabilityIfAny().Name}.{propertyValue}"));
 
                 result.Append(" })");

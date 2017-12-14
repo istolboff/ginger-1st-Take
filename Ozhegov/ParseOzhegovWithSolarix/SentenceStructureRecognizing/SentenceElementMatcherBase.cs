@@ -76,9 +76,9 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher(LinkType.SUBJECT_link, partOfSpeech, content);
         }
 
-        public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content)
+        public PartOfSpeechMatcher NextCollocationItem(PartOfSpeech partOfSpeech, string content, bool uglyHack_DoNotIncrementNextChildIndex = false)
         {
-            return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content);
+            return AddChildElementMatcher(LinkType.NEXT_COLLOCATION_ITEM_link, partOfSpeech, content, uglyHack_DoNotIncrementNextChildIndex);
         }
 
         public PartOfSpeechMatcher NextClause(PartOfSpeech partOfSpeech, string content)
@@ -176,9 +176,15 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
         private PartOfSpeechMatcher AddChildElementMatcher(
             LinkType expectedLinkType, 
             PartOfSpeech partOfSpeech, 
-            string content)
+            string content,
+            bool uglyHack_DoNotIncrementNextChildIndex = false)
         {
-            var currentChildIndex = _nextChildIndex++;
+            var currentChildIndex = _nextChildIndex;
+            if (!uglyHack_DoNotIncrementNextChildIndex)
+            {
+                ++_nextChildIndex;
+            }
+
             return new PartOfSpeechMatcher(
                 rootElement =>
                     _getElementToMatch(rootElement)

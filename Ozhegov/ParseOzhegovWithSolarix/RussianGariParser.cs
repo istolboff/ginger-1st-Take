@@ -486,10 +486,128 @@ namespace ParseOzhegovWithSolarix
                     from comma2 in следует.NextClause(PartOfSpeech.Пунктуатор, ",")
                         from что1 in comma2.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "что")
                             from положительное in что1.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                                from оно in положительное.Subject<Pronoun>(new { Gender = Gender.Средний, Number = Number.Единственное, Person = Person.Третье })
+                                from оно in положительное.Subject<Pronoun>(new { Number = Number.Единственное, Person = Person.Третье })
                 where число.Detected.Gender == натуральное.Detected.Gender && натуральное.Detected.Gender == положительное.Detected.Gender
                 let variable = new LogicVariable(число.Content)
                 select new LogicPredicate(натуральное.Lemma, variable).Follows(new LogicPredicate(положительное.Lemma, variable))
+            },
+
+            // ¬P(f(x)) 
+            {
+                "Отец Сократа не стар",
+                from стар in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                    from не in стар.NegationParticle(PartOfSpeech.Частица, "не")
+                    from отец in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                where стар.Detected.Gender == отец.Detected.Gender
+                select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma))))
+            },
+            {
+                "Отец Сократа не человек",
+                from отец in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from человек in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Множественное })
+                        from не in человек.NegationParticle(PartOfSpeech.Частица, "не")
+                        from сократа in человек.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "Отец Сократа - не человек",
+                from dash in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                    from не in dash.NegationParticle(PartOfSpeech.Частица, "не")
+                    from отец in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                    from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "Отец Сократа это не человек",
+                from это in Sentence.Root(PartOfSpeech.Местоим_Сущ, "это")
+                    from отец in это.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                    from человек in это.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from не in человек.NegationParticle(PartOfSpeech.Частица, "не")
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "Отец Сократа - это не человек",
+                from dash in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                    from это in dash.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                    from отец in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                    from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from не in человек.NegationParticle(PartOfSpeech.Частица, "не")
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "Отец Сократа не является человеком",
+                from является in Sentence.Root(PartOfSpeech.Глагол, "является")
+                    from не in является.NegationParticle(PartOfSpeech.Частица, "не")
+                    from человеком in является.Object<Noun>(new { Case = Case.Творительный, Number = Number.Единственное })
+                    from отец in является.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человеком.Lemma))
+            },
+            {
+                "Содержимое кастрюли не кипит",
+                from кипит in Sentence.Root<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                    from не in кипит.NegationParticle(PartOfSpeech.Частица, "не")
+                    from содержимое in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from кастрюли in содержимое.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicFunction(содержимое.Lemma, new LogicVariable(кастрюли.Lemma))))
+            },
+            {
+                "неверно, что отец Сократа стар",
+                from неверно in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                    from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                        from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from стар in что.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                                from отец in стар.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(стар.Lemma, new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma))))
+            },
+            {
+                "неверно, что отец Сократа -  человек",
+                from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                    from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                        from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from dash in что.NextCollocationItem(PartOfSpeech.Пунктуатор, "-", UglyHack_ThereIsGoingToBeAnotherVariantOfTheSameElement) | что.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                                from отец in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                                from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "неверно, что отец Сократа  - это человек",
+                from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                    from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                        from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from dash in что.NextCollocationItem(PartOfSpeech.Пунктуатор, "-")
+                                from это in dash.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                                from отец in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                                from человек in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человек.Lemma))
+            },
+            {
+                "неверно, что отец Сократа является человеком",
+                from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                    from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                        from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from является in что.NextCollocationItem<Verb>(new { Case = Case.Дательный, Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                                from человеком in является.Object<Noun>(new { Case = Case.Творительный, Number = Number.Единственное })
+                                from отец in является.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from сократа in отец.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new SetContainsPredicate(setElement: new LogicFunction(отец.Lemma, new LogicVariable(сократа.Lemma)), setName: человеком.Lemma))
+            },
+            {
+                "неверно, что содержимое кастрюли кипит",
+                from неверно in Sentence.Root(PartOfSpeech.Прилагательное, "неверно")
+                    from comma in неверно.NextClause(PartOfSpeech.Пунктуатор, ",")
+                        from что in comma.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from кипит in что.NextCollocationItem<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                                from содержимое in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from кастрюли in содержимое.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicFunction(содержимое.Lemma, new LogicVariable(кастрюли.Lemma))))
             }
         };
 
