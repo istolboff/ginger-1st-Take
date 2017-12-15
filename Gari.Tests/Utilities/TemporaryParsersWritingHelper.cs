@@ -12,11 +12,12 @@ namespace Gari.Tests.Utilities
     {
         public static void DumpParsingExpressionSkeleton(string sentenceText, SentenceElement sentenceElement)
         {
-            Trace.WriteLine("{");
-            Trace.WriteLine($"\t\"{sentenceText}\",");
-            DumpParsingExpressionSkeletonCore(sentenceElement, "Sentence", new HashSet<string>(), "\t");
-            Trace.WriteLine("\tselect new ??????");
-            Trace.WriteLine("}");
+            const string initialLinePrefix = "\t\t\t";
+            Trace.WriteLine(initialLinePrefix + "{");
+            Trace.WriteLine(initialLinePrefix + $"\t\"{sentenceText}\",");
+            DumpParsingExpressionSkeletonCore(sentenceElement, "Sentence", new HashSet<string>(), initialLinePrefix + "\t");
+            Trace.WriteLine(initialLinePrefix + "\tselect new ??????");
+            Trace.WriteLine(initialLinePrefix + "}");
         }
 
         public static void DumpParsingExpressionSkeletons(IEnumerable<string> sentences, IRussianGrammarParser russianGrammarParser)

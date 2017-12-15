@@ -608,6 +608,167 @@ namespace ParseOzhegovWithSolarix
                                 from содержимое in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                                     from кастрюли in содержимое.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
                 select new NegatedPredicate(new LogicPredicate(кипит.Lemma, new LogicFunction(содержимое.Lemma, new LogicVariable(кастрюли.Lemma))))
+            },
+
+            // (∀ x) x ∈ S ⇒  P(f(x)) 
+            {
+                "Цвет любого лебедя белый",
+                from белый in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                    from цвет in белый.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from лебедя in цвет.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                            from любого in лебедя.Attribute<Adjective>(new { Case = Case.Родительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут, Lemma = "любой" })
+                where белый.Detected.Gender == цвет.Detected.Gender && белый.Detected.Gender == любого.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Universal, 
+                    variable, 
+                    new SetContainsPredicate(setElement: variable, setName: лебедя.Lemma).Follows(new LogicPredicate(белый.Lemma, new LogicFunction(цвет.Lemma, variable))))
+            },
+            {
+                "Все лебеди белого цвета",
+                from лебеди in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
+                    from все in лебеди.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Множественное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                    from цвета in лебеди.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                        from белого in цвета.Attribute<Adjective>(new { Case = Case.Родительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                where цвета.Detected.Gender == белого.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Universal,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: лебеди.Lemma).Follows(new LogicPredicate(белого.Lemma, new LogicFunction(цвета.Lemma, variable))))
+            },
+
+            // (∃ x) x ∈ S ⇒  P(f(x)) 
+			{
+                "существует(ют) лебедь(и) белого цвета",
+                from существуют in Sentence.Root<Verb>(new { VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее, Lemma = "существовать" })
+                    from лебеди in существуют.Subject<Noun>(new { Case = Case.Именительный })
+                        from цвета in лебеди.RightGenitiveObject<Noun>(new { Case = Case.Родительный })
+                            from белого in цвета.Attribute<Adjective>(new { Case = Case.Родительный, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                where цвета.Detected.Gender == белого.Detected.Gender && существуют.Detected.Number == лебеди.Detected.Number
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Existential,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: лебеди.Lemma) & new LogicPredicate(белого.Lemma, new LogicFunction(цвета.Lemma, variable)))
+            },
+            {
+                "существует(ют) кастрюля(и), содержимое которой(ых) кипит",
+                from существует in Sentence.Root<Verb>(new { VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее, Lemma = "существовать" })
+                    from кастрюля in существует.Subject<Noun>(new { Case = Case.Именительный })
+                        from comma in кастрюля.Attribute(PartOfSpeech.Пунктуатор, ",")
+                            from кипит in comma.SubordinateClause<Verb>(new { Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                                from содержимое in кипит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                                    from которой in содержимое.RightGenitiveObject<Adjective>(new { Case = Case.Родительный, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                where существует.Detected.Number == кастрюля.Detected.Number && кастрюля.Detected.Number == которой.Detected.Number &&
+                      (кастрюля.Detected.Number == Number.Множественное || кастрюля.Detected.Gender == которой.Detected.Gender)
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Existential,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: кастрюля.Lemma) & new LogicPredicate(кипит.Lemma, new LogicFunction(содержимое.Lemma, variable)))
+            },
+
+            // (∀ x) x ∈ S ⇒  ¬P(x)
+            {
+                "все мужчины не беременны",
+                from беременны in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Множественное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                    from не in беременны.NegationParticle(PartOfSpeech.Частица, "не")
+                    from мужчины in беременны.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
+                        from все in мужчины.Attribute(PartOfSpeech.Прилагательное, "все")
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Universal,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: мужчины.Lemma).Follows(
+                        new NegatedPredicate(new LogicPredicate(беременны.Lemma, variable))))
+            },
+            {
+                "не существует беременных мужчин",
+                from существует in Sentence.Root(PartOfSpeech.Глагол, "существует")
+                    from не in существует.NegationParticle(PartOfSpeech.Частица, "не")
+                    from мужчин in существует.Object<Noun>(new { Case = Case.Родительный, Number = Number.Множественное })
+                        from беременных in мужчин.Attribute<Adjective>(new { Case = Case.Родительный, Number = Number.Множественное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Universal,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: мужчин.Lemma).Follows(
+                        new NegatedPredicate(new LogicPredicate(беременных.Lemma, variable))))
+            },
+            {
+                "ни один мужчина не стар",
+                from беременен in Sentence.Root<Adjective>(new { Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                    from не in беременен.NegationParticle(PartOfSpeech.Частица, "не")
+                    from мужчина in беременен.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from один in мужчина.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                        from ни in мужчина.PrefixParticle(PartOfSpeech.Частица, "ни")
+                where беременен.Detected.Gender == мужчина.Detected.Gender && мужчина.Detected.Gender == один.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Universal,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: мужчина.Lemma).Follows(
+                        new NegatedPredicate(new LogicPredicate(беременен.Lemma, variable))))
+            },
+
+            // (∃ x) x ∈ S ⇒  ¬P(x)
+            {
+                "существует(ют) не беременная(ые) женщина(ы)",
+                from существуют in Sentence.Root<Verb>(new { VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее, Lemma = "существовать" })
+                    from женщина in существуют.Subject<Noun>(new { Case = Case.Именительный })
+                        from беременная in женщина.Attribute<Adjective>(new { Case = Case.Именительный, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                            from не in беременная.NegationParticle(PartOfSpeech.Частица, "не")
+                where женщина.Detected.Number == беременная.Detected.Number && существуют.Detected.Number == женщина.Detected.Number &&
+                     (женщина.Detected.Number == Number.Множественное || женщина.Detected.Gender == беременная.Detected.Gender)
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Existential,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: женщина.Lemma) & new NegatedPredicate(new LogicPredicate(беременная.Lemma, variable)))
+            },
+            {
+                "существует женщина, которая не беременна",
+                from существует in Sentence.Root(PartOfSpeech.Глагол, "существует")
+                    from женщина in существует.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from comma in женщина.Attribute(PartOfSpeech.Пунктуатор, ",")
+                            from беременна in comma.SubordinateClause<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                                from не in беременна.NegationParticle(PartOfSpeech.Частица, "не")
+                                from которая in беременна.Subject<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                where женщина.Detected.Gender == которая.Detected.Gender && которая.Detected.Gender == беременна.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                    QuantifierType.Existential,
+                    variable,
+                    new SetContainsPredicate(setElement: variable, setName: женщина.Lemma) & new NegatedPredicate(new LogicPredicate(беременна.Lemma, variable)))
+            },
+
+            // ¬P(x, y) 
+			{
+                "Вова не любит Машу",
+                from любит in Sentence.Root<Verb>(new { Case = Case.Винительный, Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                    from не in любит.NegationParticle(PartOfSpeech.Частица, "не")
+                    from машу in любит.Object<Noun>(new { Case = Case.Винительный, Number = Number.Единственное })
+                    from вова in любит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(любит.Lemma, new LogicVariable(вова.Lemma), new LogicVariable(машу.Lemma)))
+            },
+            {
+                "Вася не выше Пети",
+                from выше in Sentence.Root<Adjective>(new { AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Сравнительная })
+                    from пети in выше.Object<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                    from не in выше.NegationParticle(PartOfSpeech.Частица, "не")
+                    from вася in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(выше.Content, new LogicVariable(вася.Lemma), new LogicVariable(пети.Lemma)))
+            },
+            {
+                "Вася не выше, чем Петя",
+                from выше in Sentence.Root<Adjective>(new { AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Сравнительная })
+                    from comma in выше.Object(PartOfSpeech.Пунктуатор, ",")
+                        from чем in comma.NextCollocationItem(PartOfSpeech.Союз, "чем")
+                            from петя in чем.NextCollocationItem<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from не in выше.NegationParticle(PartOfSpeech.Частица, "не")
+                    from вася in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                select new NegatedPredicate(new LogicPredicate(выше.Content, new LogicVariable(вася.Lemma), new LogicVariable(петя.Lemma)))
             }
         };
 
