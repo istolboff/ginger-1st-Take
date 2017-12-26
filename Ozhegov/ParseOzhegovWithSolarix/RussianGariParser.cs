@@ -769,6 +769,42 @@ namespace ParseOzhegovWithSolarix
                     from не in выше.NegationParticle(PartOfSpeech.Частица, "не")
                     from вася in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                 select new NegatedPredicate(new LogicPredicate(выше.Content, new LogicVariable(вася.Lemma), new LogicVariable(петя.Lemma)))
+            },
+
+            // P(f(x), y) 
+            {
+                "Мамой Пети является Маша",
+                from является in Sentence.Root(PartOfSpeech.Глагол, "является")
+                    from маша in является.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from мамой in является.Object<Noun>(new { Case = Case.Творительный, Number = Number.Единственное })
+                        from пети in мамой.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new EqualityPredicate(new LogicFunction(мамой.Lemma, new LogicVariable(пети.Lemma)), new LogicVariable(маша.Lemma))
+            },
+            {
+                "Папа Вовы любит Машу",
+                from любит in Sentence.Root<Verb>(new { Case = Case.Винительный, Number = Number.Единственное, VerbForm = VerbForm.Изъявительное, Person = Person.Третье, VerbAspect = VerbAspect.Несовершенный, Tense = Tense.Настоящее })
+                    from машу in любит.Object<Noun>(new { Case = Case.Винительный, Number = Number.Единственное })
+                    from папа in любит.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from вовы in папа.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new LogicPredicate(любит.Lemma, new LogicFunction(папа.Lemma, new LogicVariable(вовы.Lemma)), new LogicVariable(машу.Lemma))
+            },
+            {
+                "Папа Васи выше Пети",
+                from выше in Sentence.Root<Adjective>(new { AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Сравнительная })
+                    from пети in выше.Object<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                    from папа in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from васи in папа.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new LogicPredicate(выше.Content, new LogicFunction(папа.Lemma, new LogicVariable(васи.Lemma)), new LogicVariable(пети.Lemma))
+            },
+            {
+                "Папа Васи выше, чем Петя",
+                from выше in Sentence.Root<Adjective>(new { AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Сравнительная })
+                    from comma in выше.Object(PartOfSpeech.Пунктуатор, ",")
+                        from чем in comma.NextCollocationItem(PartOfSpeech.Союз, "чем")
+                            from петя in чем.NextCollocationItem<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from папа in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from васи in папа.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                select new LogicPredicate(выше.Content, new LogicFunction(папа.Lemma, new LogicVariable(васи.Lemma)), new LogicVariable(петя.Lemma))
             }
         };
 
