@@ -364,6 +364,33 @@ namespace ParseOzhegovWithSolarix
                             variable,
                             new SetContainsPredicate(setElement: variable, setName: лебеди.Lemma).Follows(new SetContainsPredicate(setElement: variable, setName: птицы.Lemma)))
             },
+            {
+                "Каждый лебедь это птица",
+                from это in Sentence.Root(PartOfSpeech.Местоим_Сущ, "это")
+                    from лебедь in это.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from каждый in лебедь.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                    from птица in это.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                where лебедь.Detected.Gender == каждый.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                            QuantifierType.Universal,
+                            variable,
+                            new SetContainsPredicate(setElement: variable, setName: лебедь.Lemma).Follows(new SetContainsPredicate(setElement: variable, setName: птица.Lemma)))
+            },
+            {
+                "Каждый лебедь - это птица",
+                from dash in Sentence.Root(PartOfSpeech.Пунктуатор, "-")
+                    from это in dash.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "это")
+                    from лебедь in dash.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                        from каждый in лебедь.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                    from птица in dash.Rhema<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                where лебедь.Detected.Gender == каждый.Detected.Gender
+                let variable = new LogicVariable("x")
+                select new LogicQuantifier(
+                            QuantifierType.Universal,
+                            variable,
+                            new SetContainsPredicate(setElement: variable, setName: лебедь.Lemma).Follows(new SetContainsPredicate(setElement: variable, setName: птица.Lemma)))
+            },
 
             // (∃ x) x ∈ S ⇒ P(x) 
             {

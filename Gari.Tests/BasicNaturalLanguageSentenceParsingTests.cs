@@ -8,7 +8,7 @@ using System.Linq;
 namespace Gari.Tests
 {
     [TestClass]
-    public sealed class BasicNaturalLanguageSentenceParsingTests
+    public sealed class BasicNaturalLanguageSentenceParsingTests : NaturalLanguageSentenceParsingTestBase
     {
         [TestMethod]
         public void ElementaryNaturalLanguageSentencesShouldBeCorrectlyParsedToLogicalExpressions()
@@ -79,17 +79,13 @@ namespace Gari.Tests
         [ClassInitialize]
         public static void SetupOnce(TestContext unused)
         {
-            var solarixRussianGrammarEngine = new SolarixRussianGrammarEngine();
-            solarixRussianGrammarEngine.Initialize();
-            SolarixParserMemoizer = new SolarixParserMemoizer(solarixRussianGrammarEngine);
-            GariParser = new RussianGariParser(SolarixParserMemoizer);
-            GariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
+            SetupOnceCore();
         }
 
         [ClassCleanup]
         public static void TeardownOnce()
         {
-            SolarixParserMemoizer.Dispose();
+            TeardownOnceCore();
         }
 
         private void VerifyCorrectParsing(IEnumerable<KeyValuePair<string, string>> expectedParsingResults)
@@ -110,9 +106,6 @@ namespace Gari.Tests
                 }
             }
         }
-
-        private static SolarixParserMemoizer SolarixParserMemoizer;
-        private static RussianGariParser GariParser;
 
         private static readonly IDictionary<string, string> ParsingSamples =
             new Dictionary<string, string>
@@ -143,6 +136,7 @@ namespace Gari.Tests
               // (∀ x) x ∈ S ⇒ x ∈ T
                 { "Лебеди являются птицами", "(∀ x) x ∈ set<Лебедь> ⇒ x ∈ set<Птица>" },
                 { "Лебеди[-] это птицы", "(∀ x) x ∈ set<Лебедь> ⇒ x ∈ set<Птица>" },
+                { "Каждый лебедь [-] это птица", "(∀ x) x ∈ set<Лебедь> ⇒ x ∈ set<Птица>" },
               // (∃ x) x ∈ S ⇒ P(x) 
                 { "существует живой композитор", "(∃ x) x ∈ set<Композитор> & ЖИВОЙ(x)" },
                 { "существуют живые композиторы", "(∃ x) x ∈ set<Композитор> & ЖИВОЙ(x)" },
