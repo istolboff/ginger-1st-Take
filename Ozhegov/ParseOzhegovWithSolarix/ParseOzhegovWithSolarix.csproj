@@ -53,6 +53,7 @@
     <Compile Include="Miscellaneous\StringExtensions.cs" />
     <Compile Include="Miscellaneous\TypeExtensions.cs" />
     <Compile Include="Miscellaneous\Verify.cs" />
+    <Compile Include="Planning\ActionWithConsequence.cs" />
     <Compile Include="PredicateLogic\EqualityPredicate.cs" />
     <Compile Include="PredicateLogic\LogicConnective.cs" />
     <Compile Include="PredicateLogic\LogicConnectiveType.cs" />

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
-    public sealed class LogicConnective : LogicFormula, IEquatable<LogicConnective>
+    public class LogicConnective : LogicFormula, IEquatable<LogicConnective>
     {
         public LogicConnective(LogicConnectiveType connectiveType, LogicFormula leftFormula, LogicFormula rightFormula)
         {

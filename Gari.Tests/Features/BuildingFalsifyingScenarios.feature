@@ -2,36 +2,15 @@
 
 Background:
     Given SUT is expected to obey the following rules
-    | Rule                                                                    | Parsed Form                                                                |
-    | Нажатие кнопки 'Втолкнуть' должно добавлять в начало стека строку 00001 | Event(Кнопка('Втолкнуть'), Нажат) ⇒ ДОБАВИТЬ(Строка('00001'), Начало(стек)) |
-    | Нажатие кнопки 'Вытолкнуть' должно удалять строку из начала стека       | Event(Кнопка('Вытолкнуть'), Нажат) ⇒ УДАЛИТЬ(Строка(), Начало(стек))      |
-    | Нажатие кнопки 'Очистить' должно удалять из стека все строки            | Event(Кнопка('Очистить'), Нажат) ⇒ (∀ s) s ∈ стек ⇒ УДАЛИТЬ(s, стек)    |
-    | Если стек пуст, то кнопка 'Вытолкнуть' должна быть неактивна            | ПУСТОЙ(стек) ⇒ ¬АКТИВНЫЙ(Кнопка('Вытолкнуть'))                            |
+    | Rule                                             | Parsed Form                                  |
+    | Нажатие левой кнопки должно включать лампу       | Нажать(Левая(кнопка)) ⊃> Включенный(лампа)   |
+    | Нажатие правой кнопки должно выключать лампу     | Нажать(Правая(кнопка)) ⊃> Выключенный(лампа) |
+    | Если лампа включена, то левая кнопка неактивна   | ВКЛЮЧЕН(лампа) ⇒ НЕАКТИВНЫЙ(Левая(кнопка))   |
+    | Если лампа выключена, то правая кнопка неактивна | ВЫЛЮЧЕН(лампа) ⇒ НЕАКТИВНЫЙ(Правая(кнопка))  |
 
-Scenario: Bringing SUT to a desired state in order to check that SUT's behavior is correct when switching to that state
+
+Scenario: Checking direct consequences of all actions according to the rules
     Then Falsifying Scenario should be generated
-    | Scenario Steps                               |
-    | Нажать кнопку 'Очистить'                     |
-    | Нажать кнопку 'Втолкнуть'                    |
-    | Нажать кнопку 'Вытолкнуть'                   |
-    | Проверить, что кнопка 'Вытолкнуть' неактивна |
-
-Scenario: Bringing SUT to a desired state, using different routs, in order to check that SUT's behavior in that state is correct regardless of the route it arrived there
-    Then Falsifying Scenario should be generated
-    | Scenario Steps                               |
-    | Нажать кнопку 'Очистить'                     |
-    | Нажать кнопку 'Втолкнуть'                    |
-    | Нажать кнопку 'Вытолкнуть'                   |
-    | Проверить, что кнопка 'Вытолкнуть' неактивна |
-    And Falsifying Scenario should be generated
-    | Scenario Steps                               |
-    | Нажать кнопку 'Очистить'                     |
-    | Нажать кнопку 'Втолкнуть'                    |
-    | Нажать кнопку 'Очистить'                     |
-    | Проверить, что кнопка 'Вытолкнуть' неактивна |
-
-Scenario: When there are no todos, #main and #footer should be hidden
-    Then falsifying statement should be generated
-    | Rule Text                                                     | Falsifying Statement                                     |
-    | Если список дел пуст, то #main и #footer должны быть невидимы | ПУСТОЙ(список-дел) & (ВИДИМЫЙ(#main) | ВИДИМЫЙ(#footer)) |
-
+    | User action          | Expected Outcome   |
+    | Нажать левую кнопку  | Включенный(лампа)  |
+    | Нажать правую кнопку | Выключенный(лампа) |
