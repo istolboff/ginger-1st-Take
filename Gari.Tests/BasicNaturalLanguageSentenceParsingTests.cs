@@ -63,11 +63,13 @@ namespace Gari.Tests
         [TestCategory("Helpers")]
         public void DebugSingleParserOnSingleSentence()
         {
-            const string Sentence = "Нажатие левой кнопки должно включать лампу";
-            Assert.IsTrue(
-                RussianGariParser.PrebuiltParsers[Sentence].Match(
-                      SolarixParserMemoizer.Parse(Sentence).Single())
-                           .HasValue);
+            const string Sentence = "Лебеди- это птицы";
+            if (!RussianGariParser.PrebuiltParsers[Sentence].Match(
+                    SolarixParserMemoizer.Parse(Sentence).Single()).HasValue)
+            {
+                GariParser.ParseSentence(Sentence); // dump expected parser to Trace Output
+                Assert.Fail($"Could not parse '{Sentence}'. See Test Output for suggested parser structure.");
+            }
         }
 
         [TestMethod]

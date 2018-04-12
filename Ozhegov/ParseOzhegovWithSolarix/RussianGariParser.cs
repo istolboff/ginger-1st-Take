@@ -321,9 +321,9 @@ namespace ParseOzhegovWithSolarix
             },
             {
                 "все лебеди белые",
-                from белые in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Множественное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                    from лебеди in белые.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
-                        from все in лебеди.Attribute(PartOfSpeech.Прилагательное, "все")
+                from лебеди in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
+                    from все in лебеди.Attribute(PartOfSpeech.Прилагательное, "все")
+                    from белые in лебеди.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Множественное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
                 let variable = new LogicVariable("x")
                 select new LogicQuantifier(
                             QuantifierType.Universal,
@@ -356,10 +356,10 @@ namespace ParseOzhegovWithSolarix
             },
             {
                 "Лебеди- это птицы",
-                from это in Sentence.Root(PartOfSpeech.Прилагательное, "это")
-                    from dash in это.PrefixParticle(PartOfSpeech.Пунктуатор, "-")
-                        from лебеди in dash.NextCollocationItem<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
-                    from птицы in это.Object<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                from лебеди in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
+                    from dash in лебеди.NextClause(PartOfSpeech.Пунктуатор, "-")
+                        from птицы in dash.NextCollocationItem<Noun>(new { Case = Case.Именительный, Number = Number.Множественное })
+                            from это in птицы.Subject(PartOfSpeech.Местоим_Сущ, "это")
                 let variable = new LogicVariable("x")
                 select new LogicQuantifier(
                             QuantifierType.Universal,
@@ -513,9 +513,9 @@ namespace ParseOzhegovWithSolarix
                                 from что in число.Subject(PartOfSpeech.Местоим_Сущ, "что")
                             from comma1 in того.Punctuation(PartOfSpeech.Пунктуатор, ",")
                     from comma2 in следует.NextClause(PartOfSpeech.Пунктуатор, ",")
-                        from что1 in comma2.NextCollocationItem(PartOfSpeech.Местоим_Сущ, "что")
-                            from положительное in что1.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                                from оно in положительное.Subject<Pronoun>(new { Number = Number.Единственное, Person = Person.Третье })
+                        from что1 in comma2.NextCollocationItem(PartOfSpeech.Союз, "что")
+                            from оно in что1.NextCollocationItem<Pronoun>(new { Number = Number.Единственное, Person = Person.Третье })
+                                from положительное in оно.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
                 where число.Detected.Gender == натуральное.Detected.Gender && натуральное.Detected.Gender == положительное.Detected.Gender
                 let variable = new LogicVariable(число.Content)
                 select new LogicPredicate(натуральное.Lemma, variable).Follows(new LogicPredicate(положительное.Lemma, variable))
@@ -642,10 +642,10 @@ namespace ParseOzhegovWithSolarix
             // (∀ x) x ∈ S ⇒  P(f(x)) 
             {
                 "Цвет любого лебедя белый",
-                from белый in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                    from цвет in белый.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                        from лебедя in цвет.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
-                            from любого in лебедя.Attribute<Adjective>(new { Case = Case.Родительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут, Lemma = "любой" })
+                from цвет in Sentence.Root<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
+                    from лебедя in цвет.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
+                        from любого in лебедя.Attribute<Adjective>(new { Lemma = "любой", Case = Case.Родительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
+                    from белый in цвет.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
                 where белый.Detected.Gender == цвет.Detected.Gender && белый.Detected.Gender == любого.Detected.Gender
                 let variable = new LogicVariable("x")
                 select new LogicQuantifier(
@@ -839,7 +839,7 @@ namespace ParseOzhegovWithSolarix
             // ad hoc parsers
 			{
                 "Нажатие левой кнопки должно включать лампу",
-                from должно in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
+                from должно in Sentence.Root<Adjective>(new { Lemma = "должный", Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
                     from включать in должно.Infinitive()
                         from лампу in включать.Object<Noun>(new { Case = Case.Винительный })
                     from нажатие in должно.Subject<VerbalNoun>(new { Case = Case.Именительный })

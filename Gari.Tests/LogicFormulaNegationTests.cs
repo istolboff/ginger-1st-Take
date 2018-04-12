@@ -26,6 +26,7 @@ namespace Gari.Tests
                 using (var accumulatingAssert = new AccumulatingAssert())
                 {
                     var originalFormula = GariParser.ParseSentence(formula.Key);
+                    Assert.IsNotNull(originalFormula, $"GariParser failed to parse sentence '{formula.Key}'");
                     accumulatingAssert.AssertEqual(
                         formula.Value,
                         LogicFormula.Negate(originalFormula).ToString(),
