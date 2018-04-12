@@ -7,6 +7,7 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
     {
         public LogicConstant(string constantName)
         {
+            Require.NotNullOrWhitespace(constantName, nameof(constantName));
             Name = constantName;
         }
 

@@ -9,15 +9,92 @@ using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.Solarix
 {
-    public sealed class SolarixRussianGrammarEngine : IRussianGrammarParser
+    public sealed class SolarixRussianGrammarEngine : IRussianGrammarParser, IThesaurus
     {
         public SolarixRussianGrammarEngine()
         {
-            _engineHandle = GrammarEngine.sol_CreateGrammarEngineW(null);
-            if (_engineHandle == IntPtr.Zero)
-            {
-                throw new InvalidOperationException("Could not create Grammar Engine");
-            }
+            _engineHandle = new DisposableIntPtr(
+                GrammarEngine.sol_CreateGrammarEngineW(null), 
+                handle => GrammarEngine.sol_DeleteGrammarEngine(handle), 
+                "GrammarEngine");
+
+            _grammarCharacteristicsBuilders =
+                new Dictionary<PartOfSpeech, Func<IntPtr, int, GrammarCharacteristics>>
+                {
+                    {
+                        PartOfSpeech.Существительное,
+                        (hNode, versionIndex) =>
+                            TryGetInfinitive(hNode)
+                            .Fold(
+                                infinitive => new VerbalNounCharacteristics(
+                                    GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                                    GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                                    GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                                    TryGetNodeVersionCoordinateState<Form>(hNode, versionIndex),
+                                    infinitive),
+                                () => new NounCharacteristics(
+                                    GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                                    GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                                    GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                                    TryGetNodeVersionCoordinateState<Form>(hNode, versionIndex)))
+                    },
+                    {
+                        PartOfSpeech.Глагол,
+                        (hNode, versionIndex) =>
+                            new VerbCharacteristics(
+                                TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<VerbForm>(hNode, versionIndex),
+                                TryGetNodeVersionCoordinateState<Person>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<Tense>(hNode, versionIndex),
+                                TryGetNodeVersionCoordinateState<Transitiveness>(hNode, versionIndex))
+                    },
+                    {
+                        PartOfSpeech.Прилагательное,
+                        (hNode, versionIndex) =>
+                            new AdjectiveCharacteristics(
+                                TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                                TryGetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                                TryGetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                                GetBoolCoordinateState(hNode, versionIndex, GrammarEngineAPI.SHORTNESS_ru, AdjectiveForm.Краткое, AdjectiveForm.Полное),
+                                GetNodeVersionCoordinateState<ComparisonForm>(hNode, versionIndex))
+                    },
+                    {
+                        PartOfSpeech.Наречие,
+                        (hNode, versionIndex) =>
+                            new AdverbCharacteristics(GetNodeVersionCoordinateState<ComparisonForm>(hNode, versionIndex))
+                    },
+                    {
+                        PartOfSpeech.Деепричастие,
+                        (hNode, versionIndex) =>
+                            new GerundCharacteristics(
+                                GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex))
+                    },
+                    {
+                        PartOfSpeech.Местоимение,
+                        (hNode, versionIndex) =>
+                            new PronounCharacteristics(
+                                GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
+                                GetNodeVersionCoordinateState<Person>(hNode, versionIndex))
+                    },
+                    {
+                        PartOfSpeech.Инфинитив,
+                        (hNode, versionIndex) =>
+                            GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex).Apply(
+                                verbAspect => verbAspect == VerbAspect.Совершенный 
+                                    ? new InfinitiveCharacteristics(
+                                        GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex),
+                                        GetNodeVersionCoordinateState<Transitiveness>(hNode, versionIndex),
+                                        GrammarEngine.sol_GetNodeContentsFX(hNode))
+                                    : new InfinitiveCharacteristics(
+                                        GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex),
+                                        GetNodeVersionCoordinateState<Transitiveness>(hNode, versionIndex),
+                                        GetPerfectFormOfInfinitive(hNode, versionIndex).Value))
+                    }
+                };
         }
 
         public void Initialize(string dictionaryPath = null)
@@ -69,10 +146,53 @@ namespace ParseOzhegovWithSolarix.Solarix
             }
         }
 
+        public IOptional<string> FindLinkedParticipleInPassiveVoice(string word)
+        {
+            var wordClassIds = new[] { GrammarEngineAPI.INFINITIVE_ru, GrammarEngineAPI.VERB_ru, GrammarEngineAPI.NOUN_ru };
+
+            foreach (var classId in wordClassIds)
+            {
+                var wordId = GrammarEngine.sol_FindEntry(_engineHandle, word, classId, GrammarEngineAPI.RUSSIAN_LANGUAGE);
+                if (wordId == -1)
+                {
+                    continue;
+                }
+
+                var linksList = GrammarEngine.sol_ListLinksTxt(_engineHandle, wordId, GrammarEngineAPI.TO_ADJ_link, 0);
+                if (linksList == IntPtr.Zero)
+                {
+                    continue;
+                }
+
+                var linkListCount = GrammarEngine.sol_LinksInfoCount(_engineHandle, linksList);
+                if (linkListCount == 0)
+                {
+                    GrammarEngine.sol_DeleteLinksInfo(_engineHandle, linksList);
+                    continue;
+                }
+
+                string result = null;
+                for (var i = 0; i != linkListCount; ++i)
+                {
+                    var linkedWordId = GrammarEngine.sol_LinksInfoEKey2(_engineHandle, linksList, i);
+                    if (GrammarEngine.sol_GetEntryCoordState(_engineHandle, linkedWordId, GrammarEngineAPI.PASSIVE_PARTICIPLE_ru) == 1)
+                    {
+                        result = GetEntryName(linkedWordId);
+                        break;
+                    }
+                }
+
+                GrammarEngine.sol_DeleteLinksInfo(_engineHandle, linksList);
+
+                return Optional.Some(result);
+            }
+
+            return Optional.None<string>();
+        }
+
         private SentenceElement CreateSentenceElement(IntPtr hNode, int? leafType = null)
         {
-            var content = new StringBuilder(LongestWordLength);
-            GrammarEngine.sol_GetNodeContents(hNode, content);
+            var content = GrammarEngine.sol_GetNodeContentsFX(hNode);
 
             var lemmaVersions = Enumerable.Range(0, GrammarEngine.sol_GetNodeVersionCount(_engineHandle, hNode))
                 .Select(versionIndex => 
@@ -129,11 +249,7 @@ namespace ParseOzhegovWithSolarix.Solarix
 
         public void Dispose()
         {
-            if (_engineHandle != IntPtr.Zero)
-            {
-                GrammarEngine.sol_DeleteGrammarEngine(_engineHandle);
-                _engineHandle = IntPtr.Zero;
-            }
+            _engineHandle.Dispose();
         }
 
         private string DescribeError()
@@ -147,8 +263,8 @@ namespace ParseOzhegovWithSolarix.Solarix
         private static string DefaultSolarixDictionaryXmlPath => 
             Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName, @"dictionary.xml"));
 
-        private static GrammarCharacteristics BuldGrammarCharacteristics(IntPtr hNode, int versionIndex, PartOfSpeech? partOfSpeech) => 
-            partOfSpeech == null || !GrammarCharacteristicsBuilders.TryGetValue(partOfSpeech.Value, out var builder)
+        private GrammarCharacteristics BuldGrammarCharacteristics(IntPtr hNode, int versionIndex, PartOfSpeech? partOfSpeech) => 
+            partOfSpeech == null || !_grammarCharacteristicsBuilders.TryGetValue(partOfSpeech.Value, out var builder)
                     ? new NullGrammarCharacteristics()
                     : builder(hNode, versionIndex);
 
@@ -161,6 +277,57 @@ namespace ParseOzhegovWithSolarix.Solarix
             }
 
             return result.Value;
+        }
+
+        private IOptional<string> TryGetInfinitive(IntPtr hNode)
+        {
+            var wordList = GrammarEngine.sol_SeekThesaurus(_engineHandle, GrammarEngine.sol_GetNodeIEntry(_engineHandle, hNode), 0, 0, 0, 0, 0);
+            var potentialInfinitives = SolarixIntArrayToSystemArray(wordList);
+            GrammarEngine.sol_DeleteInts(wordList);
+
+            return potentialInfinitives
+                .Select(id => new
+                {
+                    id,
+                    classId = GrammarEngine.sol_GetEntryClass(_engineHandle, id),
+                    aspect = GrammarEngine.sol_GetEntryCoordState(_engineHandle, id, GrammarEngineAPI.ASPECT_ru)
+                })
+                .Where(item => item.classId == GrammarEngineAPI.INFINITIVE_ru &&
+                               item.aspect.IsOneOf(GrammarEngineAPI.PERFECT_ru, GrammarEngineAPI.IMPERFECT_ru))
+                .OrderBy(item => item.aspect == GrammarEngineAPI.PERFECT_ru ? 0 : 1)
+                .OptionalFirst()
+                .Map(item => GetEntryName(item.id));
+        }
+
+        private IOptional<string> GetPerfectFormOfInfinitive(IntPtr hNode, int versionIndex)
+        {
+            var linksList = GrammarEngine.sol_ListLinksTxt(_engineHandle, GrammarEngine.sol_GetNodeIEntry(_engineHandle, hNode), GrammarEngineAPI.TO_PERFECT, 0);
+            if (linksList == IntPtr.Zero)
+            {
+                return Optional.None<string>();
+            }
+
+            var linkListCount = GrammarEngine.sol_LinksInfoCount(_engineHandle, linksList);
+            if (linkListCount == 0)
+            {
+                GrammarEngine.sol_DeleteLinksInfo(_engineHandle, linksList);
+                return Optional.None<string>();
+            }
+
+            string result = null;
+            for (var i = 0; i != linkListCount; ++i)
+            {
+                var linkedWordId = GrammarEngine.sol_LinksInfoEKey2(_engineHandle, linksList, i);
+                if (GrammarEngine.sol_GetEntryCoordState(_engineHandle, linkedWordId, GrammarEngineAPI.ASPECT_ru) == GrammarEngineAPI.PERFECT_ru)
+                {
+                    result = GetEntryName(linkedWordId);
+                    break;
+                }
+            }
+
+            GrammarEngine.sol_DeleteLinksInfo(_engineHandle, linksList);
+
+            return Optional.Some(result);
         }
 
         private static TState? TryGetNodeVersionCoordinateState<TState>(IntPtr hNode, int versionIndex) where TState : struct
@@ -184,62 +351,32 @@ namespace ParseOzhegovWithSolarix.Solarix
             }
         }
 
-        private IntPtr _engineHandle;
-
-        private static readonly IDictionary<PartOfSpeech, Func<IntPtr, int, GrammarCharacteristics>> GrammarCharacteristicsBuilders = 
-            new Dictionary<PartOfSpeech, Func<IntPtr, int, GrammarCharacteristics>>
+        private static int[] SolarixIntArrayToSystemArray(IntPtr solarixIntArray)
+        {
+            var arrayLength = GrammarEngine.sol_CountInts(solarixIntArray);
+            if (arrayLength <= 0)
             {
-                {
-                    PartOfSpeech.Существительное,
-                    (hNode, versionIndex) =>
-                        new NounCharacteristics(
-                            GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
-                            TryGetNodeVersionCoordinateState<Form>(hNode, versionIndex))
-                },
-                {
-                    PartOfSpeech.Глагол,
-                    (hNode, versionIndex) =>
-                        new VerbCharacteristics(
-                            TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<VerbForm>(hNode, versionIndex),
-                            TryGetNodeVersionCoordinateState<Person>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Tense>(hNode, versionIndex))
-                },
-                {
-                    PartOfSpeech.Прилагательное,
-                    (hNode, versionIndex) => 
-                        new AdjectiveCharacteristics(
-                            TryGetNodeVersionCoordinateState<Case>(hNode, versionIndex),
-                            TryGetNodeVersionCoordinateState<Number>(hNode, versionIndex),
-                            TryGetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
-                            GetBoolCoordinateState(hNode, versionIndex, GrammarEngineAPI.SHORTNESS_ru, AdjectiveForm.Краткое, AdjectiveForm.Полное),
-                            GetNodeVersionCoordinateState<ComparisonForm>(hNode, versionIndex))
-                },
-                {
-                    PartOfSpeech.Наречие,
-                    (hNode, versionIndex) =>
-                        new AdverbCharacteristics(GetNodeVersionCoordinateState<ComparisonForm>(hNode, versionIndex))
-                },
-                {
-                    PartOfSpeech.Деепричастие,
-                    (hNode, versionIndex) =>
-                        new GerundCharacteristics(
-                            GetNodeVersionCoordinateState<Case>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<VerbAspect>(hNode, versionIndex))
-                },
-                {
-                    PartOfSpeech.Местоимение,
-                    (hNode, versionIndex) =>
-                        new PronounCharacteristics(
-                            GetNodeVersionCoordinateState<Gender>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Number>(hNode, versionIndex),
-                            GetNodeVersionCoordinateState<Person>(hNode, versionIndex))
-                }
-            };
+                return new int[0];
+            }
+
+            var result = new int[arrayLength];
+            for (var i = 0; i != arrayLength; ++i)
+            {
+                result[i] = GrammarEngine.sol_GetInt(solarixIntArray, i);
+            }
+
+            return result;
+        }
+
+        private string GetEntryName(int entryId)
+        {
+            var buffer = new StringBuilder(LongestWordLength);
+            GrammarEngine.sol_GetEntryName(_engineHandle, entryId, buffer);
+            return buffer.ToString();
+        }
+
+        private readonly DisposableIntPtr _engineHandle;
+        private readonly IDictionary<PartOfSpeech, Func<IntPtr, int, GrammarCharacteristics>> _grammarCharacteristicsBuilders; 
 
         private static readonly IDictionary<Type, int> CoordinateStateTypeToCoordinateIdMap = 
             new Dictionary<Type, int>
@@ -252,7 +389,8 @@ namespace ParseOzhegovWithSolarix.Solarix
                 { typeof(VerbForm), GrammarEngineAPI.VERB_FORM_ru },
                 { typeof(VerbAspect), GrammarEngineAPI.ASPECT_ru },
                 { typeof(Tense), GrammarEngineAPI.TENSE_ru },
-                { typeof(ComparisonForm), GrammarEngineAPI.COMPAR_FORM_ru }
+                { typeof(ComparisonForm), GrammarEngineAPI.COMPAR_FORM_ru },
+                { typeof(Transitiveness), GrammarEngineAPI.TRANSITIVENESS_ru }
             };
 
         private const int RussianLanguage = 2;

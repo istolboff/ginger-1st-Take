@@ -53,30 +53,7 @@ namespace Gari.Tests.Utilities
         private static string CreateSelectingMethod(SentenceElement sentenceElement)
         {
             var result = new StringBuilder();
-            result.Append(
-                sentenceElement.LeafLinkType == null ? "Root" :
-                new Dictionary<LinkType, string>
-                {
-                    { LinkType.SUBJECT_link, "Subject" },
-                    { LinkType.OBJECT_link, "Object" },
-                    { LinkType.RHEMA_link, "Rhema" },
-                    { LinkType.NEXT_COLLOCATION_ITEM_link, "NextCollocationItem" },
-                    { LinkType.NEGATION_PARTICLE_link, "NegationParticle" },
-                    { LinkType.NEXT_CLAUSE_link, "NextClause" },
-                    { LinkType.RIGHT_GENITIVE_OBJECT_link, "RightGenitiveObject" },
-                    { LinkType.ATTRIBUTE_link,  "Attribute" },
-                    { LinkType.RIGHT_NAME_link, "RightName" },
-                    { LinkType.SEPARATE_ATTR_link, "SeparateAttribute" },
-                    { LinkType.PREFIX_PARTICLE_link, "PrefixParticle" },
-                    { LinkType.RIGHT_LOGIC_ITEM_link, "RightLogicItem" },
-                    { LinkType.DETAILS_link, "Details" },
-                    { LinkType.PUNCTUATION_link, "Punctuation" },
-                    { LinkType.PREFIX_CONJUNCTION_link, "PrefixConjunction" },
-                    { LinkType.SUBORDINATE_CLAUSE_link, "SubordinateClause" },
-                    { LinkType.PREPOS_ADJUNCT_link, "PreposAdjunct" },
-                    { LinkType.NEXT_ADJECTIVE_link, "NextAdjective" },
-                    { LinkType.BEG_INTRO_link, "BegIntro" }
-                }[sentenceElement.LeafLinkType.Value]);
+            result.Append(sentenceElement.LeafLinkType == null ? "Root" : LinkTypeName[sentenceElement.LeafLinkType.Value]);
 
             var firstLemma = sentenceElement.LemmaVersions.First();
             if (firstLemma.Characteristics is NullGrammarCharacteristics)
@@ -110,5 +87,30 @@ namespace Gari.Tests.Utilities
             { "-", "dash" },
             { ",", "comma" },
         };
+
+        private static readonly VerboseIndexer<LinkType, string> LinkTypeName = new Dictionary<LinkType, string>
+                {
+                    { LinkType.SUBJECT_link, "Subject" },
+                    { LinkType.OBJECT_link, "Object" },
+                    { LinkType.RHEMA_link, "Rhema" },
+                    { LinkType.NEXT_COLLOCATION_ITEM_link, "NextCollocationItem" },
+                    { LinkType.NEGATION_PARTICLE_link, "NegationParticle" },
+                    { LinkType.NEXT_CLAUSE_link, "NextClause" },
+                    { LinkType.RIGHT_GENITIVE_OBJECT_link, "RightGenitiveObject" },
+                    { LinkType.ATTRIBUTE_link,  "Attribute" },
+                    { LinkType.RIGHT_NAME_link, "RightName" },
+                    { LinkType.SEPARATE_ATTR_link, "SeparateAttribute" },
+                    { LinkType.PREFIX_PARTICLE_link, "PrefixParticle" },
+                    { LinkType.RIGHT_LOGIC_ITEM_link, "RightLogicItem" },
+                    { LinkType.DETAILS_link, "Details" },
+                    { LinkType.PUNCTUATION_link, "Punctuation" },
+                    { LinkType.PREFIX_CONJUNCTION_link, "PrefixConjunction" },
+                    { LinkType.SUBORDINATE_CLAUSE_link, "SubordinateClause" },
+                    { LinkType.PREPOS_ADJUNCT_link, "PreposAdjunct" },
+                    { LinkType.NEXT_ADJECTIVE_link, "NextAdjective" },
+                    { LinkType.BEG_INTRO_link, "BegIntro" },
+                    { LinkType.INFINITIVE_link, "Infinitive" }
+                }
+                .WithVerboseIndexing("LinkType");
     }
 }

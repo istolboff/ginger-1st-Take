@@ -27,7 +27,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public override bool Equals(object obj) => Equals(obj as LogicQuantifier);
 
-        public override int GetHashCode() => (((Type.GetHashCode() * 397) ^ Variable.GetHashCode()) * 397) ^ Scope.GetHashCode();
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (((Type.GetHashCode() * 397) ^ Variable.GetHashCode()) * 397) ^ Scope.GetHashCode();
+            }
+        }
 
         public override string ToString() => $"({(Type == QuantifierType.Universal ? '∀' : '∃')} {Variable}) {Scope}";
     }

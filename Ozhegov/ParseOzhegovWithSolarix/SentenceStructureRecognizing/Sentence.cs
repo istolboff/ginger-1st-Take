@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ParseOzhegovWithSolarix.Solarix;
-using System.Threading;
 
 namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
 {

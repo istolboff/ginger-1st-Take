@@ -1,12 +1,19 @@
 ﻿namespace ParseOzhegovWithSolarix.Miscellaneous
 {
-    public class Optional<T> : IOptional<T>
+    public static class Optional
     {
-        private Optional()
+        public static Optional<T> None<T>() => new Optional<T>();
+
+        public static Optional<T> Some<T>(T value) => new Optional<T>(value);
+    }
+
+    public sealed class Optional<T> : IOptional<T>
+    {
+        internal Optional()
         {
         }
 
-        public Optional(T value)
+        internal Optional(T value)
         {
             _value = value;
             HasValue = true;
@@ -22,8 +29,6 @@
                 return _value;
             }
         }
-
-        public static readonly Optional<T> None = new Optional<T>();
 
         private readonly T _value;
     }

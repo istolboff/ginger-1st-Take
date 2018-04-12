@@ -1,7 +1,7 @@
-﻿using Gari.Tests.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
 using ParseOzhegovWithSolarix.Solarix;
+using Gari.Tests.Utilities;
 
 namespace Gari.Tests
 {
@@ -10,9 +10,9 @@ namespace Gari.Tests
     {
         protected static void SetupOnceCore()
         {
-            var solarixRussianGrammarEngine = new SolarixRussianGrammarEngine();
-            solarixRussianGrammarEngine.Initialize();
-            SolarixParserMemoizer = new SolarixParserMemoizer(solarixRussianGrammarEngine);
+            RussianGrammarEngine = new SolarixRussianGrammarEngine();
+            RussianGrammarEngine.Initialize();
+            SolarixParserMemoizer = new SolarixParserMemoizer(RussianGrammarEngine);
             GariParser = new RussianGariParser(SolarixParserMemoizer);
             GariParser.ParsingFailed += TemporaryParsersWritingHelper.DumpParsingExpressionSkeleton;
         }
@@ -22,7 +22,10 @@ namespace Gari.Tests
             SolarixParserMemoizer.Dispose();
         }
 
-        protected static SolarixParserMemoizer SolarixParserMemoizer;
-        protected static RussianGariParser GariParser;
+        public static SolarixRussianGrammarEngine RussianGrammarEngine { get; private set; }
+
+        public static RussianGariParser GariParser { get; private set; }
+
+        protected static SolarixParserMemoizer SolarixParserMemoizer { get; private set; }
     }
 }

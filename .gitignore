@@ -30,6 +30,7 @@ bin/
 obj/
 TestResults/
 .vs/ginger/v15/
+.vs/config/
 ###################
 # project.lock.json#
 ###################

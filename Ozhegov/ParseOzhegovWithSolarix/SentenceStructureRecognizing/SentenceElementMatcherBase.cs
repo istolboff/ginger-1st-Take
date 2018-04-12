@@ -66,6 +66,11 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             return AddChildElementMatcher<TChildGrammarCharacteristics>(LinkType.SEPARATE_ATTR_link, expectedProperties);
         }
 
+        public SentenceElementMatcher<InfinitiveCharacteristics> Infinitive()
+        {
+            return AddChildElementMatcher<InfinitiveCharacteristics>(LinkType.INFINITIVE_link, new object());
+        }
+
         public PartOfSpeechMatcher Object(PartOfSpeech partOfSpeech, string content)
         {
             return AddChildElementMatcher(LinkType.OBJECT_link, partOfSpeech, content);
@@ -126,18 +131,18 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             var elementToMatch = _getElementToMatch(rootSentenceElement);
             if (elementToMatch == null)
             {
-                return Optional<TResult>.None;
+                return Optional.None<TResult>();
             }
 
             var matchingLemma = MatchCore(elementToMatch);
             if (matchingLemma == null)
             {
-                return Optional<TResult>.None;
+                return Optional.None<TResult>();
             }
 
             Sentence.MatchingResults.Add(this, new ElementMatchingResult(elementToMatch.Content, matchingLemma));
 
-            return new Optional<TResult>(This);
+            return Optional.Some(This);
         }
 
         public static ISentenceElementMatcher<TResult> operator |(

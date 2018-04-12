@@ -1,4 +1,5 @@
 ﻿using System;
+using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
@@ -6,6 +7,7 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
     {
         public LogicVariable(string name)
         {
+            Require.NotNullOrWhitespace(name, nameof(name));
             Name = name;
         }
 

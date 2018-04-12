@@ -16,7 +16,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public override bool Equals(object obj) => Equals(obj as NegatedPredicate);
 
-        public override int GetHashCode() => (Target.GetHashCode() * 397) ^ 1;
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Target.GetHashCode() * 397) ^ 1;
+            }
+        }
 
         public override string ToString() => $"¬{Target.ToString("N", null)}";
     }

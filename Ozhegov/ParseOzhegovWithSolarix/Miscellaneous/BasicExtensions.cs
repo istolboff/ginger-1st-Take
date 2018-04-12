@@ -15,5 +15,10 @@ namespace ParseOzhegovWithSolarix.Miscellaneous
                    value.Equals(secondValue) ||
                    (allOtherValues != null && Array.IndexOf(allOtherValues, value) >= 0);
         }
+
+        public static TResult Apply<T, TResult>(this T @this, Func<T, TResult> functor)
+        {
+            return functor(@this);
+        }
     }
 }

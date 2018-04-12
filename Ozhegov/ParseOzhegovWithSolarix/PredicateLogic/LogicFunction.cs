@@ -9,6 +9,7 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
     {
         public LogicFunction(string name, params LogicTerm[] arguments)
         {
+            Require.NotNullOrWhitespace(name, nameof(name));
             Name = name;
             Arguments = new ReadOnlyCollection<LogicTerm>(arguments);
         }
@@ -26,7 +27,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public override bool Equals(object obj) => Equals(obj as LogicFunction);
 
-        public override int GetHashCode() => (Name.GetHashCode() * 397) ^ Arguments.Count.GetHashCode();
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Arguments.Count.GetHashCode();
+            }
+        }
 
         public override string ToString() => $"{Name.FirstCharToUpper()}({string.Join(", ", Arguments)})";
     }

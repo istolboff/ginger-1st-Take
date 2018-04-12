@@ -17,14 +17,14 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
                         var firstMatch = @this.Match(rootSentence);
                         if (!firstMatch.HasValue)
                         {
-                            return Optional<TResult>.None;
+                            return Optional.None<TResult>();
                         }
 
                         var intermediateMatcher = ExecuteMatcherSelector(selector, firstMatch.Value);
                         var intermediateMatch = intermediateMatcher.Match(rootSentence);
                         return intermediateMatch.HasValue
-                            ? new Optional<TResult>(projector(firstMatch.Value, intermediateMatch.Value)) 
-                            : Optional<TResult>.None;
+                            ? Optional.Some(projector(firstMatch.Value, intermediateMatch.Value)) 
+                            : Optional.None<TResult>();
                     });
         }
 
@@ -32,12 +32,7 @@ namespace ParseOzhegovWithSolarix.SentenceStructureRecognizing
             this ISentenceElementMatcher<TInput> @this,
             Func<TInput, TResult> selector)
         {
-            return new FunctorBasedMatcher<TResult>(
-                    rootSentence =>
-                    {
-                        var match = @this.Match(rootSentence);
-                        return match.HasValue ? new Optional<TResult>(selector(match.Value)) : Optional<TResult>.None;
-                    });
+            return new FunctorBasedMatcher<TResult>(rootSentence => @this.Match(rootSentence).Map(selector));
         }
 
         public static ISentenceElementMatcher<TResult> Where<TResult>(

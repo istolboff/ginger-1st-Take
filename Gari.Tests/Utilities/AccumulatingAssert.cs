@@ -1,19 +1,33 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Gari.Tests.Utilities
 {
     internal sealed class AccumulatingAssert : IDisposable
     {
-        public void AssertEqual(string expectedValue, string actualValue, string extraInfo = null)
+        public void AssertIsTrue(bool condition, string extraInfo)
+        {
+            Assert.IsTrue(condition, extraInfo);
+
+            if (!condition)
+            {
+                _failedAssertions.Add(extraInfo);
+            }
+            else
+            {
+                Trace.WriteLine($"Assert.IsTrue({extraInfo}");
+            }
+        }
+
+        public void AssertEqual<T>(T expectedValue, T actualValue, string extraInfo = null) 
         {
             Assert.AreEqual(expectedValue, actualValue, extraInfo);
 
-            if (expectedValue != actualValue)
+            if (!expectedValue.Equals(actualValue))
             {
                 _failedAssertions.Add($"Expected: {expectedValue}, Actual: {actualValue} {extraInfo}");
             }

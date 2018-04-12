@@ -28,7 +28,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public override bool Equals(object obj) => Equals(obj as LogicConnective);
 
-        public override int GetHashCode() => (((ConnectiveType.GetHashCode() * 397) ^ LeftFormula.GetHashCode()) * 397) ^ RightFormula.GetHashCode();
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (((ConnectiveType.GetHashCode() * 397) ^ LeftFormula.GetHashCode()) * 397) ^ RightFormula.GetHashCode();
+            }
+        }
 
         public override string ToString() => $"{LeftFormula} {ConnectiveTypeCharacter[ConnectiveType]} {RightFormula}";
 

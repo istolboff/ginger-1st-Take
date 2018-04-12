@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Miscellaneous\BasicExtensions.cs" />
+    <Compile Include="Miscellaneous\DisposableIntPtr.cs" />
     <Compile Include="Miscellaneous\IOptional.cs" />
     <Compile Include="Miscellaneous\Optional.cs" />
     <Compile Include="Miscellaneous\OptionalExtensions.cs" />
+    <Compile Include="Miscellaneous\Require.cs" />
     <Compile Include="Miscellaneous\StringExtensions.cs" />
     <Compile Include="Miscellaneous\TypeExtensions.cs" />
     <Compile Include="Miscellaneous\Verify.cs" />
@@ -84,6 +86,8 @@
     <Compile Include="Solarix\GerundCharacteristics.cs" />
     <Compile Include="Solarix\GrammarCharacteristics.cs" />
     <Compile Include="Miscellaneous\CollectionExtensions.cs" />
+    <Compile Include="Solarix\InfinitiveCharacteristics.cs" />
+    <Compile Include="Solarix\IThesaurus.cs" />
     <Compile Include="Solarix\IRussianGrammarParser.cs" />
     <Compile Include="Solarix\LemmaVersion.cs" />
     <Compile Include="Solarix\LinkType.cs" />
@@ -99,11 +103,14 @@
     <Compile Include="Solarix\PronounCharacteristics.cs" />
     <Compile Include="Solarix\SentenceElement.cs" />
     <Compile Include="Solarix\SolarixRussianGrammarEngine.cs" />
+    <Compile Include="Solarix\Transitiveness.cs" />
+    <Compile Include="Solarix\VerbalNounCharacteristics.cs" />
     <Compile Include="Solarix\_sg_api.cs" />
     <Compile Include="Solarix\Tense.cs" />
     <Compile Include="Solarix\VerbAspect.cs" />
     <Compile Include="Solarix\VerbCharacteristics.cs" />
     <Compile Include="Solarix\VerbForm.cs" />
+    <Compile Include="Testing\FalsifyingScenario.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,6 +1,6 @@
 ﻿namespace ParseOzhegovWithSolarix.Solarix
 {
-    public sealed class NounCharacteristics : GrammarCharacteristics
+    public class NounCharacteristics : GrammarCharacteristics
     {
         public NounCharacteristics(Case @case, Number number, Gender gender, Form? form)
         {

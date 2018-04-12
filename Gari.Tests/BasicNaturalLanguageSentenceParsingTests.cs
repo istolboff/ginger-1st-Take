@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParseOzhegovWithSolarix;
-using ParseOzhegovWithSolarix.Solarix;
 using Gari.Tests.Utilities;
-using System.Linq;
 
 namespace Gari.Tests
 {
@@ -40,17 +39,17 @@ namespace Gari.Tests
         {
             foreach (var sentence in new[] 
                 {
-                    "Сократ стара",
-                    "Маша стар",
+                    "Корабль стара",
+                    "Птица стар",
                     "Каждый облако конечно",
-                    "Каждая Сократ смертен",
+                    "Каждая человек смертен",
                     "Каждая зверушка смертен",
                     "Существует живая композитор",
                     "Существует живой рыба",
                     "Цвет любого лебедя белая"
                 })
             {
-                Assert.IsNull(GariParser.ParseSentence(sentence));
+                Assert.IsNull(GariParser.ParseSentence(sentence), $"Sentence {sentence} was parsed successfully yet it shouldn't have.");
             }
         }
 
@@ -64,7 +63,11 @@ namespace Gari.Tests
         [TestCategory("Helpers")]
         public void DebugSingleParserOnSingleSentence()
         {
-            RussianGariParser.PrebuiltParsers["существует(ют) не беременная(ые) женщина(ы)"].Match(SolarixParserMemoizer.Parse("существуют не беременные женщины").Single());
+            const string Sentence = "Нажатие левой кнопки должно включать лампу";
+            Assert.IsTrue(
+                RussianGariParser.PrebuiltParsers[Sentence].Match(
+                      SolarixParserMemoizer.Parse(Sentence).Single())
+                           .HasValue);
         }
 
         [TestMethod]

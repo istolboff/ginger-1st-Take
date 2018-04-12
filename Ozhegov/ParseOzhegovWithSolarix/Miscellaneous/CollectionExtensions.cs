@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ParseOzhegovWithSolarix.Miscellaneous
@@ -16,26 +15,14 @@ namespace ParseOzhegovWithSolarix.Miscellaneous
             return index < @this.Count ? @this[index] : default(T);
         }
 
-        public static IEnumerable<TResult> Partition<TSource, TResult>(
-            this IEnumerable<TSource> @this, 
-            Func<TSource, TSource, TResult> makePartition)
+        public static IOptional<T> OptionalFirst<T>(this IEnumerable<T> @this)
         {
-            TSource first = default(TSource);
-            var setFirstElement = true;
-
-            foreach (var item in @this)
+            foreach (var value in @this)
             {
-                if (setFirstElement)
-                {
-                    first = item;
-                    setFirstElement = false;
-                }
-                else
-                {
-                    yield return makePartition(first, item);
-                    setFirstElement = true;
-                }
+                return Optional.Some(value);
             }
+
+            return Optional.None<T>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
@@ -7,6 +8,7 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
         public SetContainsPredicate(string setName, LogicTerm setElement)
             : base("∈", new LogicConstant(setName), setElement)
         {
+            Require.NotNullOrWhitespace(setName, nameof(setName));
         }
 
         public string SetName => Terms[0].ToString();

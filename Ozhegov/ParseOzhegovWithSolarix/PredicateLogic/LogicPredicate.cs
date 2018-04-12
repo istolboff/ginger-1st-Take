@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ParseOzhegovWithSolarix.Miscellaneous;
 
 namespace ParseOzhegovWithSolarix.PredicateLogic
 {
     public class LogicPredicate : LogicFormula, IFormattable, IEquatable<LogicPredicate>
     {
         public LogicPredicate(string predicateName, params LogicTerm[] terms)
+            : this(predicateName, new ReadOnlyCollection<LogicTerm>(terms))
         {
+        }
+
+        public LogicPredicate(string predicateName, ReadOnlyCollection<LogicTerm> terms)
+        {
+            Require.NotNullOrWhitespace(predicateName, nameof(predicateName));
             Name = predicateName;
-            Terms = new ReadOnlyCollection<LogicTerm>(terms);
+            Terms = terms;
         }
 
         public string Name { get; }
@@ -26,7 +33,13 @@ namespace ParseOzhegovWithSolarix.PredicateLogic
 
         public override bool Equals(object obj) => Equals(obj as LogicPredicate);
 
-        public override int GetHashCode() => (Name.GetHashCode() * 397) ^ Terms.Count.GetHashCode();
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Terms.Count.GetHashCode();
+            }
+        }
 
         public override string ToString() => $"{Name.ToUpper()}({string.Join(", ", Terms)})";
 

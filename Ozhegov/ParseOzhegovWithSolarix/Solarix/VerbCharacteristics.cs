@@ -2,7 +2,14 @@
 {
     public sealed class VerbCharacteristics : GrammarCharacteristics
     {
-        public VerbCharacteristics(Case? @case, Number number, VerbForm verbForm, Person? person, VerbAspect verbAspect, Tense tense)
+        public VerbCharacteristics(
+            Case? @case, 
+            Number number, 
+            VerbForm verbForm, 
+            Person? person, 
+            VerbAspect verbAspect, 
+            Tense tense,
+            Transitiveness? transitiveness)
         {
             Case = @case;
             Number = number;
@@ -10,6 +17,7 @@
             Person = person;
             VerbAspect = verbAspect;
             Tense = tense;
+            Transitiveness = transitiveness;
         }
 
         public Case? Case { get; }
@@ -24,9 +32,11 @@
 
         public Tense Tense { get; }
 
+        public Transitiveness? Transitiveness { get; }
+
         public override string ToString()
         {
-            return $"Падеж={Case}; Число={Number}; Наклонение={VerbForm}; Лицо={Person}; Вид={VerbAspect}; Время={Tense}";
+            return $"Падеж={Case}; Число={Number}; Наклонение={VerbForm}; Лицо={Person}; Вид={VerbAspect}; Время={Tense}; Переходность={Transitiveness}";
         }
     }
 }

@@ -51,8 +51,8 @@ namespace Gari.Tests.Utilities
         private IOptional<IReadOnlyCollection<SentenceElement>> TryToRecallResult(string text)
         {
             return _knownSentences.TryGetValue(text, out var sentenceElements) 
-                        ? new Optional<IReadOnlyCollection<SentenceElement>>(sentenceElements.Value) 
-                        : Optional<IReadOnlyCollection<SentenceElement>>.None;
+                        ? Optional.Some(sentenceElements.Value) 
+                        : Optional.None<IReadOnlyCollection<SentenceElement>>();
         }
 
         private void Memoize(string text, IReadOnlyCollection<SentenceElement> result)
@@ -76,7 +76,7 @@ namespace Gari.Tests.Utilities
         {
             return File
                 .ReadLines(DataFilePath, Encoding.UTF8)
-                .Partition((text, serializedData) => new { text, serializedData })
+                .PartitionToPairs((text, serializedData) => new { text, serializedData })
                 .ToDictionary(item => item.text, item => new Lazy<IReadOnlyCollection<SentenceElement>>(() => Deserialize(item.serializedData)));
         }
 
