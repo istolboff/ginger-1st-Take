@@ -61,10 +61,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicNaturalLanguageSentenceParsingTests.cs" />
-    <Compile Include="Features\BuildingFalsifyingScenarios.feature.cs">
+    <Compile Include="Features\WolfSheepAndCabbage.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>BuildingFalsifyingScenarios.feature</DependentUpon>
+      <DependentUpon>WolfSheepAndCabbage.feature</DependentUpon>
     </Compile>
     <Compile Include="InputStringVariationGeneratorTests.cs" />
     <Compile Include="LogicFormulaNegationTests.cs" />
@@ -84,9 +84,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Features\BuildingFalsifyingScenarios.feature">
+    <None Include="Features\WolfSheepAndCabbage.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
-      <LastGenOutput>BuildingFalsifyingScenarios.feature.cs</LastGenOutput>
+      <LastGenOutput>WolfSheepAndCabbage.feature.cs</LastGenOutput>
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>

@@ -834,37 +834,6 @@ namespace ParseOzhegovWithSolarix
                     from папа in выше.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
                         from васи in папа.RightGenitiveObject<Noun>(new { Case = Case.Родительный, Number = Number.Единственное })
                 select new LogicPredicate(выше.Content, new LogicFunction(папа.Lemma, new LogicVariable(васи.Lemma)), new LogicVariable(петя.Lemma))
-            },
-
-            // ad hoc parsers
-			{
-                "Нажатие левой кнопки должно включать лампу",
-                from должно in Sentence.Root<Adjective>(new { Lemma = "должный", Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                    from включать in должно.Infinitive()
-                        from лампу in включать.Object<Noun>(new { Case = Case.Винительный })
-                    from нажатие in должно.Subject<VerbalNoun>(new { Case = Case.Именительный })
-                        from кнопки in нажатие.RightGenitiveObject<Noun>(new { Case = Case.Родительный })
-                            from левой in кнопки.Attribute<Adjective>(new { Case = Case.Родительный, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                where должно.Detected.Gender == нажатие.Detected.Gender &&
-                      (левой.Detected.Number == Number.Единственное && кнопки.Detected.Number == Number.Единственное && кнопки.Detected.Gender == левой.Detected.Gender ||
-                       левой.Detected.Number == Number.Множественное && кнопки.Detected.Number == Number.Множественное)
-                select new ActionWithConsequence(
-                    new LogicFunction(нажатие.Detected.RelatedInfinitive, new LogicFunction(левой.Lemma, new LogicConstant(кнопки.Lemma))), 
-                    new LogicFunction(включать.Detected.PerfectForm, new LogicConstant(лампу.Lemma)))
-            },
-            {
-                "Если лампа включена, то левая кнопка неактивна",
-                from включена in Sentence.Root<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                    from лампа in включена.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                    from если in включена.PrefixConjunction(PartOfSpeech.Союз, "Если")
-                    from comma in включена.NextClause(PartOfSpeech.Пунктуатор, ",")
-                        from то in comma.NextCollocationItem(PartOfSpeech.Союз, "то")
-                            from неактивна in то.NextCollocationItem<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Краткое, ComparisonForm = ComparisonForm.Атрибут })
-                                from кнопка in неактивна.Subject<Noun>(new { Case = Case.Именительный, Number = Number.Единственное })
-                                    from левая in кнопка.Attribute<Adjective>(new { Case = Case.Именительный, Number = Number.Единственное, AdjectiveForm = AdjectiveForm.Полное, ComparisonForm = ComparisonForm.Атрибут })
-                where включена.Detected.Gender == лампа.Detected.Gender && неактивна.Detected.Gender == кнопка.Detected.Gender && левая.Detected.Gender == кнопка.Detected.Gender
-                select new LogicPredicate(включена.Lemma, new LogicConstant(лампа.Lemma)).Follows(
-                    new LogicPredicate(неактивна.Lemma, new LogicFunction(левая.Lemma, new LogicConstant(кнопка.Lemma))))
             }
         };
 

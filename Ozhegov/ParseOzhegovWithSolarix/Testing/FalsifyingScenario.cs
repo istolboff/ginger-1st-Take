@@ -1,16 +1,18 @@
-﻿using ParseOzhegovWithSolarix.PredicateLogic;
+﻿using System.Collections.Generic;
+using ParseOzhegovWithSolarix.Miscellaneous;
+using ParseOzhegovWithSolarix.PredicateLogic;
 
 namespace ParseOzhegovWithSolarix.Testing
 {
     public sealed class FalsifyingScenario
     {
-        public FalsifyingScenario(LogicFunction stimulus, LogicFormula expectedOutcome)
+        public FalsifyingScenario(IEnumerable<LogicFunction> stimuli, LogicFormula expectedOutcome)
         {
-            Stimulus = stimulus;
+            Stimuli = stimuli.AsImmutable();
             ExpectedOutcome = expectedOutcome;
         }
 
-        public LogicFunction Stimulus { get; }
+        public IReadOnlyCollection<LogicFunction> Stimuli { get; }
 
         public LogicFormula ExpectedOutcome { get; }
     }
