@@ -61,6 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicNaturalLanguageSentenceParsingTests.cs" />
+    <Compile Include="Features\TodoMvc.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TodoMvc.feature</DependentUpon>
+    </Compile>
     <Compile Include="Features\WolfSheepAndCabbage.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -83,6 +88,10 @@
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
+    </None>
+    <None Include="Features\TodoMvc.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>TodoMvc.feature.cs</LastGenOutput>
     </None>
     <None Include="Features\WolfSheepAndCabbage.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
